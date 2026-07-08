@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <style>
+        body { background: #e0e0e0; margin: 0; padding: 20px; }
+        .window {
+            width: 320px; height: 400px;
+            background: white; border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+        .title-bar { padding: 10px; background: #ddd; font-weight: bold; cursor: move; }
+        iframe { flex: 1; border: none; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">Calculator.app</div>
+        <iframe src="calculator.html"></iframe>
+    </div>
+</body>
+</html>
