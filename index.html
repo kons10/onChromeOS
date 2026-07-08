@@ -1,21 +1,137 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@material/web/all.js"></script>
     <style>
-        body { background: #e0e0e0; margin: 0; padding: 20px; }
-        .window {
-            width: 320px; height: 400px;
-            background: white; border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            overflow: hidden; display: flex; flex-direction: column;
+        * { box-sizing: border-box; }
+        
+        :root {
+            --md-sys-color-primary: #1f6feb;
+            --md-sys-color-on-surface: #202124;
+            --md-sys-color-surface: #ffffff;
+            --md-sys-color-surface-dim: #eeeeee;
+            --md-elevation-level: 1;
         }
-        .title-bar { padding: 10px; background: #ddd; font-weight: bold; cursor: move; }
-        iframe { flex: 1; border: none; }
+        
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0; 
+            padding: 40px; 
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .window {
+            width: 480px; 
+            height: 600px;
+            background: var(--md-sys-color-surface); 
+            border-radius: 12px;
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column;
+            position: relative;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .window md-elevation {
+            position: absolute;
+            border-radius: inherit;
+        }
+        
+        .window:hover {
+            --md-elevation-level: 2;
+        }
+        
+        .title-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            padding: 0 16px;
+            background: var(--md-sys-color-surface-dim);
+            border-bottom: 1px solid #e0e0e0;
+            cursor: move;
+            user-select: none;
+            -webkit-user-select: none;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .title-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .window-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .title-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            letter-spacing: 0.25px;
+        }
+        
+        .title-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        md-icon-button {
+            --md-icon-button-icon-size: 20px;
+        }
+        
+        md-icon-button[data-close]:hover md-icon {
+            color: #d32f2f;
+        }
+        
+        iframe { 
+            flex: 1; 
+            border: none;
+            background: white;
+        }
     </style>
 </head>
 <body>
     <div class="window">
-        <div class="title-bar">Calculator.app</div>
+        <md-elevation></md-elevation>
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <div class="window-icon">📱</div>
+                <div class="title-text">Calculator.app</div>
+            </div>
+            <div class="title-bar-right">
+                <md-icon-button title="最小化" aria-label="最小化">
+                    <md-icon>minimize</md-icon>
+                </md-icon-button>
+                <md-icon-button title="最大化" aria-label="最大化">
+                    <md-icon>unfold_less</md-icon>
+                </md-icon-button>
+                <md-icon-button title="閉じる" aria-label="閉じる" data-close>
+                    <md-icon>close</md-icon>
+                </md-icon-button>
+            </div>
+        </div>
         <iframe src="https://calculator.apps.chrome/"></iframe>
     </div>
 </body>
