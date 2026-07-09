@@ -36,8 +36,15 @@
             overflow: hidden; 
             display: flex; 
             flex-direction: column;
-            position: relative;
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
             transition: box-shadow 0.3s ease;
+        }
+        
+        .window.dragging {
+            transition: none;
         }
         
         .window md-elevation {
@@ -130,5 +137,45 @@
         </div>
         <iframe src="https://gcalc.pages.dev/"></iframe>
     </div>
+
+    <script>
+        const window = document.querySelector('.window');
+        const titleBar = document.querySelector('.title-bar');
+        
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+        
+        titleBar.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            window.classList.add('dragging');
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const rect = window.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            window.style.left = `${initialLeft + deltaX}px`;
+            window.style.top = `${initialTop + deltaY}px`;
+            window.style.transform = 'none';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                window.classList.remove('dragging');
+            }
+        });
+    </script>
 </body>
 </html>
