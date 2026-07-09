@@ -10,7 +10,15 @@ export function initWindowDrag() {
     let pendingLeft = 0;
     let pendingTop = 0;
     
-    // 初期位置を設定（transform を解除して left/top で位置決め）
+    // ドラッグ用オーバーレイ要素
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.zIndex = '9999';
+    overlay.style.cursor = 'move';
+    overlay.style.backgroundColor = 'transparent'; // 透明に設定
+
+    // 初期位置を設定
     const rect = windowEl.getBoundingClientRect();
     windowEl.style.left = `${rect.left}px`;
     windowEl.style.top = `${rect.top}px`;
@@ -19,6 +27,9 @@ export function initWindowDrag() {
     function startDrag(clientX, clientY) {
         isDragging = true;
         windowEl.classList.add('dragging');
+        
+        // 全画面オーバーレイを追加してイベントをキャプチャ
+        document.body.appendChild(overlay);
         
         startX = clientX;
         startY = clientY;
@@ -50,6 +61,12 @@ export function initWindowDrag() {
         if (isDragging) {
             isDragging = false;
             windowEl.classList.remove('dragging');
+            
+            // オーバーレイを削除
+            if (overlay.parentNode) {
+                document.body.removeChild(overlay);
+            }
+            
             if (rafId) {
                 cancelAnimationFrame(rafId);
                 rafId = null;
@@ -57,33 +74,30 @@ export function initWindowDrag() {
         }
     }
     
-    // マウスイベント
+    // マウスイベント (TitleBarで開始、Overlayで継続)
     titleBar.addEventListener('mousedown', (e) => {
         startDrag(e.clientX, e.clientY);
-        e.preventDefault();
     });
     
-    document.addEventListener('mousemove', (e) => {
+    // Overlayに対してMouseMoveとMouseUpをバインドするのがポイント
+    overlay.addEventListener('mousemove', (e) => {
         handleMove(e.clientX, e.clientY);
     });
     
-    document.addEventListener('mouseup', endDrag);
+    overlay.addEventListener('mouseup', endDrag);
     
     // タッチイベント
     titleBar.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
         startDrag(touch.clientX, touch.clientY);
-        e.preventDefault();
     }, { passive: false });
     
-    document.addEventListener('touchmove', (e) => {
+    overlay.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         handleMove(touch.clientX, touch.clientY);
-        e.preventDefault();
     }, { passive: false });
     
-    document.addEventListener('touchend', endDrag);
+    overlay.addEventListener('touchend', endDrag);
 }
 
-// モジュールが読み込まれたら自動的に初期化
 initWindowDrag();
