@@ -154,25 +154,23 @@
         windowEl.style.top = `${rect.top}px`;
         windowEl.style.transform = 'none';
         
-        titleBar.addEventListener('mousedown', (e) => {
+        function startDrag(clientX, clientY) {
             isDragging = true;
             windowEl.classList.add('dragging');
             
-            startX = e.clientX;
-            startY = e.clientY;
+            startX = clientX;
+            startY = clientY;
             
             const currentRect = windowEl.getBoundingClientRect();
             initialLeft = currentRect.left;
             initialTop = currentRect.top;
-            
-            e.preventDefault();
-        });
+        }
         
-        document.addEventListener('mousemove', (e) => {
+        function handleMove(clientX, clientY) {
             if (!isDragging) return;
             
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
             
             pendingLeft = initialLeft + deltaX;
             pendingTop = initialTop + deltaY;
@@ -184,9 +182,9 @@
                     rafId = null;
                 });
             }
-        });
+        }
         
-        document.addEventListener('mouseup', () => {
+        function endDrag() {
             if (isDragging) {
                 isDragging = false;
                 windowEl.classList.remove('dragging');
@@ -195,7 +193,34 @@
                     rafId = null;
                 }
             }
+        }
+        
+        // マウスイベント
+        titleBar.addEventListener('mousedown', (e) => {
+            startDrag(e.clientX, e.clientY);
+            e.preventDefault();
         });
+        
+        document.addEventListener('mousemove', (e) => {
+            handleMove(e.clientX, e.clientY);
+        });
+        
+        document.addEventListener('mouseup', endDrag);
+        
+        // タッチイベント
+        titleBar.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            startDrag(touch.clientX, touch.clientY);
+            e.preventDefault();
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            handleMove(touch.clientX, touch.clientY);
+            e.preventDefault();
+        }, { passive: false });
+        
+        document.addEventListener('touchend', endDrag);
     </script>
 </body>
 </html>
