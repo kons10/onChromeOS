@@ -139,22 +139,28 @@
     </div>
 
     <script>
-        const window = document.querySelector('.window');
+        const windowEl = document.querySelector('.window');
         const titleBar = document.querySelector('.title-bar');
         
         let isDragging = false;
         let startX, startY, initialLeft, initialTop;
         
+        // 初期位置を設定（transform を解除して left/top で位置決め）
+        const rect = windowEl.getBoundingClientRect();
+        windowEl.style.left = `${rect.left}px`;
+        windowEl.style.top = `${rect.top}px`;
+        windowEl.style.transform = 'none';
+        
         titleBar.addEventListener('mousedown', (e) => {
             isDragging = true;
-            window.classList.add('dragging');
+            windowEl.classList.add('dragging');
             
             startX = e.clientX;
             startY = e.clientY;
             
-            const rect = window.getBoundingClientRect();
-            initialLeft = rect.left;
-            initialTop = rect.top;
+            const currentRect = windowEl.getBoundingClientRect();
+            initialLeft = currentRect.left;
+            initialTop = currentRect.top;
             
             e.preventDefault();
         });
@@ -165,15 +171,14 @@
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
             
-            window.style.left = `${initialLeft + deltaX}px`;
-            window.style.top = `${initialTop + deltaY}px`;
-            window.style.transform = 'none';
+            windowEl.style.left = `${initialLeft + deltaX}px`;
+            windowEl.style.top = `${initialTop + deltaY}px`;
         });
         
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
-                window.classList.remove('dragging');
+                windowEl.classList.remove('dragging');
             }
         });
     </script>
