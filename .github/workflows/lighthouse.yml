@@ -27,12 +27,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-lhci-
 
+      - name: Install LHCI
+        run: npm i -D @lhci/cli
+
       - name: Run Lighthouse
-        run: |
-          npm install -g @lhci/cli
-          lhci autorun --collect.staticDistDir=.
-          pwd
-          ls -R .lighthouseci/ || echo "Directory not found"
+        run: npx lhci autorun --collect.staticDistDir=.
+
 
       - name: Upload Report
         uses: actions/upload-artifact@v7
