@@ -1,9 +1,10 @@
-name: Lighthouse Report
+name: Lighthouse CI Auto Report
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   lighthouse:
@@ -11,28 +12,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # npm cache
-      - name: Cache npm
-        uses: actions/cache@v6
+      - name: Setup Node (Latest LTS)
+        uses: actions/setup-node@v7
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-cache
-
-      # LHCI cache
-      - name: Cache LHCI
-        uses: actions/cache@v6
-        with:
-          path: .lighthouseci
-          key: ${{ runner.os }}-lhci-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-lhci-
+          node-version: 24
+          cache: npm
 
       - name: Install LHCI
         run: npm i -D @lhci/cli
 
-      - name: Run Lighthouse
-        run: npx lhci autorun --collect.staticDistDir=.
-
+      - name: Run Lighthouse (fast)
+        run: |
+          npx lhci autorun \
+            --collect.staticDistDir=. \
+            --collect.numberOfRuns=1 \
+            --collect.settings.chromeFlags="--headless --no-sandbox --disable-dev-shm-usage"
 
       - name: Upload Report
         uses: actions/upload-artifact@v7
