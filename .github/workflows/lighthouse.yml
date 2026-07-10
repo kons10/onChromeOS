@@ -20,7 +20,8 @@ jobs:
           ls -R .lighthouseci/ || echo "ディレクトリが見つかりません"
           
       - name: Upload Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lighthouse-report
           path: .lighthouseci/*
+          include-hidden-files: true
