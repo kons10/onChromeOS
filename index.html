@@ -33,7 +33,7 @@
             width: 480px; 
             height: 600px;
             background: var(--md-sys-color-surface); 
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden; 
             display: flex; 
             flex-direction: column;
@@ -61,8 +61,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 56px;
-            padding: 0 16px;
+            height: auto;
+            padding: 0px 0px 0px 16px;
             background: var(--md-sys-color-surface-dim);
             border-bottom: 1px solid #e0e0e0;
             cursor: move;
@@ -75,25 +75,11 @@
         .title-bar-left {
             display: flex;
             align-items: center;
-            gap: 12px;
             flex: 1;
         }
         
-        .window-icon {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
-            color: white;
-            font-size: 18px;
-            font-weight: 500;
-        }
-        
         .title-text {
-            font-size: 14px;
+            font-size: auto;
             font-weight: 500;
             color: var(--md-sys-color-on-surface);
             letter-spacing: 0.25px;
@@ -102,7 +88,6 @@
         .title-bar-right {
             display: flex;
             align-items: center;
-            gap: 4px;
         }
         
         md-icon-button {
@@ -121,7 +106,6 @@
         <md-elevation></md-elevation>
         <div class="title-bar">
             <div class="title-bar-left">
-                <div class="window-icon">📱</div>
                 <div class="title-text">Calculator</div>
             </div>
             <div class="title-bar-right">
