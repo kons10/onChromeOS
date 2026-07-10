@@ -16,24 +16,10 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
 
-      # package-lock.json が無い場合は CI が自動生成する
-      - name: Generate lockfile if missing
+      - name: Run Lighthouse (super fast)
         run: |
-          if [ ! -f package-lock.json ]; then
-            echo "package-lock.json が無いので自動生成します"
-            npm init -y
-            npm i -D @lhci/cli
-          fi
-
-      # npm ci は lockfile があると最速で依存関係を復元する
-      - name: Install dependencies (cached)
-        run: npm ci
-
-      - name: Run Lighthouse (fast)
-        run: |
-          npx lhci autorun \
+          npx @lhci/cli autorun \
             --collect.staticDistDir=. \
             --collect.numberOfRuns=1 \
             --collect.settings.chromeFlags="--headless --no-sandbox --disable-dev-shm-usage"
