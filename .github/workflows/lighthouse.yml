@@ -14,8 +14,9 @@ jobs:
       - name: Run Lighthouse
         run: |
           npm install -g @lhci/cli
-          # フォルダをそのまま指定して計測！
           lhci autorun --collect.staticDistDir=.
+          # どこに何があるか見せてもらう
+          ls -R .lighthouseci/ || echo "ディレクトリが見つかりません"
           
       - name: Upload Report
         uses: actions/upload-artifact@v4
