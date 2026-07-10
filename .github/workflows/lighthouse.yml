@@ -9,13 +9,14 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Run Lighthouse
         run: |
           npm install -g @lhci/cli
           lhci autorun --collect.staticDistDir=.
           # どこに何があるか見せてもらう
+          pwd
           ls -R .lighthouseci/ || echo "ディレクトリが見つかりません"
           
       - name: Upload Report
