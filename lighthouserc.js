@@ -1,8 +1,7 @@
 module.exports = {
   ci: {
     collect: {
-      staticDistDir: '.', // あなたのビルド成果物があるフォルダ
-      // startServerCommand: 'npm run start' // 必要なら
+      staticDistDir: '.', // ビルド成果物があるフォルダ
     },
     upload: {
       target: 'filesystem',
