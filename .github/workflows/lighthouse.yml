@@ -1,26 +1,18 @@
 name: Lighthouse Report
 
-# ここを追加：プッシュのたびに実行されるようになる
 on:
   push:
     branches:
-      - main  # 必要に応じてブランチ名は変更してね
+      - main
 
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        run: |
-          npm install
-          npm run build
+      
       - name: Run Lighthouse
         run: |
           npm install -g @lhci/cli
-          lhci autorun --config=lighthouserc.js
-      - name: Upload Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-report
-          path: .lighthouseci/*.html
+          # フォルダをそのまま指定して計測！
+          lhci autorun --collect.staticDistDir=.
