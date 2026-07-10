@@ -1,0 +1,8 @@
+{
+  "name": "onchromeos",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@lhci/cli": "^0.14.0"
+  }
+}
