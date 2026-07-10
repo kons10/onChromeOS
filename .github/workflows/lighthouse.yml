@@ -10,15 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      
+
+      # npm cache
+      - name: Cache npm
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache
+
+      # LHCI cache
+      - name: Cache LHCI
+        uses: actions/cache@v6
+        with:
+          path: .lighthouseci
+          key: ${{ runner.os }}-lhci-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-lhci-
+
       - name: Run Lighthouse
         run: |
           npm install -g @lhci/cli
           lhci autorun --collect.staticDistDir=.
-          # どこに何があるか見せてもらう
           pwd
-          ls -R .lighthouseci/ || echo "ディレクトリが見つかりません"
-          
+          ls -R .lighthouseci/ || echo "Directory not found"
+
       - name: Upload Report
         uses: actions/upload-artifact@v7
         with:
