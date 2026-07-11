@@ -106,25 +106,27 @@
     </style>
 </head>
 <body>
-    <div class="window">
-        <md-elevation></md-elevation>
-        <div class="title-bar">
-            <div class="title-bar-left">
-                <div class="title-text">Calculator</div>
+    <main>
+        <div class="window">
+            <md-elevation></md-elevation>
+            <div class="title-bar">
+                <div class="title-bar-left">
+                    <div class="title-text">Calculator</div>
+                </div>
+                <div class="title-bar-right">
+                    <md-icon-button title="最小化" aria-label="最小化">
+                        <md-icon></md-icon>
+                    </md-icon-button>
+                    <md-icon-button title="最大化" aria-label="最大化">
+                        <md-icon></md-icon>
+                    </md-icon-button>
+                    <md-icon-button title="閉じる" aria-label="閉じる" data-close>
+                        <md-icon></md-icon>
+                    </md-icon-button>
+                </div>
             </div>
-            <div class="title-bar-right">
-                <md-icon-button title="最小化" aria-label="最小化">
-                    <md-icon></md-icon>
-                </md-icon-button>
-                <md-icon-button title="最大化" aria-label="最大化">
-                    <md-icon></md-icon>
-                </md-icon-button>
-                <md-icon-button title="閉じる" aria-label="閉じる" data-close>
-                    <md-icon></md-icon>
-                </md-icon-button>
-            </div>
+            <iframe src="https://gcalc.pages.dev/"></iframe>
         </div>
-        <iframe src="https://gcalc.pages.dev/"></iframe>
-    </div>
+    </main>
 </body>
 </html>
