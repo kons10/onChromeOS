@@ -1,0 +1,44 @@
+# on-chromeos.pages.dev
+
+A fork of ChromeOS built entirely with modern web technologies.  
+This project recreates the windowed desktop experience of ChromeOS in a browser, featuring draggable windows, material design components, and embedded web applications.
+
+## Overview
+
+This is a Web-based desktop environment that simulates the ChromeOS window manager.  
+It uses native Web Components (LitElement/MWC) to implement a draggable, resizable window system that hosts embedded web apps (e.g., a calculator) inside iframes.
+
+## Key Features
+
+- **Desktop-like Window Manager** – Draggable, movable windows with title bars.
+- **Material Web Components** – Uses MWC (Material Web Components) for UI elements like icon buttons and elevation effects.
+- **Embedded Web Apps** – Runs external web applications (e.g., calculator) inside sandboxed iframes.
+- **ChromeOS-inspired UI** – Mimics the look and feel of ChromeOS with a modern Material Design aesthetic.
+- **Lightweight & Portable** – Runs entirely in the browser without native dependencies.
+
+## Architecture
+
+- **Base Framework**: Vanilla HTML/CSS/JavaScript with ES Modules.
+- **UI Library**: Material Web Components (`mwc.js`) from Google's MWC library.
+- **Component Model**: LitElement-based custom elements.
+- **Window Logic**: Custom drag-and-drop implementation (`window.js`) that handles window positioning, minimize/maximize/close actions.
+- **External Content**: Embedded applications are loaded via `<iframe>` (e.g., `https://gcalc.pages.dev/`).
+
+## Technologies Used
+
+- **Web Components** (Custom Elements v1, Shadow DOM)
+- **Lit** (LitElement & lit-html for reactive UI)
+- **Material Design 3** (via MWC)
+- **CSS Custom Properties** (theming)
+- **ES Modules** (native JavaScript module loading)
+
+## Related Links
+
+- [Live Demo](https://on-chromeos.pages.dev/)
+- [Calculator App (embedded)](https://gcalc.pages.dev/)
+- [Google Fonts (Roboto)](https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap)
+- [Material Symbols](https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined)
+
+## Purpose
+
+This project demonstrates how a full-featured desktop environment can be implemented using only open web standards. It serves as a reference for building window managers, embedded application hosts, and ChromeOS-like interfaces without proprietary technologies.
