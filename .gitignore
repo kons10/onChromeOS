@@ -1,16 +1,6 @@
-```
-# Dependencies
+# README.md は無視しない
 node_modules/
-
-# Logs and temp files
 *.log
-*.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
+.env*
 .vscode/
-```
+!.env.example
