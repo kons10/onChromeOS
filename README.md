@@ -21,7 +21,7 @@ ChromeOS のデスクトップ環境を Web ブラウザ上でシミュレート
 
 ## 使用方法
 
-1. `index.html` をモダンな Web ブラウザで開く
+1. ローカルサーバーでプロジェクトを配信（例: `python -m http.server`）し、ブラウザで `http://localhost:8000/` を開く
 2. デフォルトで表示されているウィンドウを操作可能
 3. ウィンドウのタイトルバーをドラッグして移動
 4. ウィンドウ右下をドラッグしてリサイズ
@@ -33,30 +33,39 @@ ChromeOS のデスクトップ環境を Web ブラウザ上でシミュレート
 
 ```
 ├── index.html          # メイン HTML ファイル
-├── style.css           # スタイル定義
-└── script.js           # ウィンドウ管理ロジック
+├── css/
+│   └── styles.css      # スタイル定義
+└── js/
+    ├── mwc.js          # Material Web Components
+    ├── window.js       # ウィンドウ管理ロジック
+    └── window-manager.js # ウィンドウマネージャー
 ```
 
 ### カスタマイズ方法
 
 #### アプリの追加
 
-`script.js` 内の `apps` 配列に新しいアプリオブジェクトを追加：
+`index.html` 内の既存の `.window` ブロックをコピーし、`<iframe>` の `src` 属性を新しいアプリの URL に設定：
 
-```javascript
-{
-  id: 'app-id',
-  title: 'App Name',
-  url: 'https://example.com',
-  icon: '📱',
-  width: 800,
-  height: 600
-}
+```html
+<div class="window">
+    <div class="window-content">
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <div class="title-text">App Name</div>
+            </div>
+            <div class="title-bar-right">
+                <!-- ボタン... -->
+            </div>
+        </div>
+        <iframe src="https://example.com" title="App Name"></iframe>
+    </div>
+</div>
 ```
 
 #### スタイルの変更
 
-`style.css` を編集して、色テーマやレイアウトをカスタマイズ可能。
+`css/styles.css` を編集して、色テーマやレイアウトをカスタマイズ可能。
 
 ### ブラウザ互換性
 
