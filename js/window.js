@@ -6,7 +6,7 @@ export function initWindowDrag() {
     
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
-    let rafId = null;
+    let currentPointerId = null;
     
     // ドラッグ用オーバーレイ要素
     const overlay = document.createElement('div');
@@ -22,80 +22,74 @@ export function initWindowDrag() {
     windowEl.style.top = `${rect.top}px`;
     windowEl.style.transform = 'none';
     
-    function startDrag(clientX, clientY) {
-        isDragging = true;
-        windowEl.classList.add('dragging');
-        
-        // 全画面オーバーレイを追加してイベントをキャプチャ
-        document.body.appendChild(overlay);
-        
-        startX = clientX;
-        startY = clientY;
-        
-        const currentRect = windowEl.getBoundingClientRect();
-        initialLeft = currentRect.left;
-        initialTop = currentRect.top;
-    }
-    
-    function handleMove(clientX, clientY) {
-        if (!isDragging) return;
-        
-        const deltaX = clientX - startX;
-        const deltaY = clientY - startY;
-        
-        const newLeft = initialLeft + deltaX;
-        const newTop = initialTop + deltaY;
-        
-        // requestAnimationFrame でスムーズに更新
-        if (rafId === null) {
-            rafId = requestAnimationFrame(() => {
-                windowEl.style.left = `${newLeft}px`;
-                windowEl.style.top = `${newTop}px`;
-                rafId = null;
-            });
-        }
-    }
-    
-    function endDrag() {
-        if (!isDragging) return;
-        
-        isDragging = false;
-        windowEl.classList.remove('dragging');
-        
-        // オーバーレイを削除
-        if (overlay.parentNode) {
-            document.body.removeChild(overlay);
-        }
-        
-        if (rafId !== null) {
-            cancelAnimationFrame(rafId);
-            rafId = null;
-        }
-    }
-    
-    // ポインタイベントを使用してマウスとタッチを統一
-    titleBar.addEventListener('pointerdown', (e) => {
+    function startDrag(e) {
         // ボタン領域のクリックはドラッグを開始しない
         if (e.target.closest('.title-bar-right')) return;
         // 最大化状態ではドラッグを開始しない
         if (windowEl.hasAttribute('data-maximized')) return;
         
         e.preventDefault();
-        titleBar.setPointerCapture(e.pointerId);
-        startDrag(e.clientX, e.clientY);
-    });
+        
+        isDragging = true;
+        currentPointerId = e.pointerId;
+        windowEl.classList.add('dragging');
+        
+        // 全画面オーバーレイを追加してイベントをキャプチャ
+        document.body.appendChild(overlay);
+        
+        // Pointer capture を開始
+        titleBar.setPointerCapture(currentPointerId);
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        const currentRect = windowEl.getBoundingClientRect();
+        initialLeft = currentRect.left;
+        initialTop = currentRect.top;
+    }
     
-    // Overlay に対して PointerMove と PointerUp をバインド
-    overlay.addEventListener('pointermove', (e) => {
-        handleMove(e.clientX, e.clientY);
-    });
+    function handleMove(e) {
+        if (!isDragging) return;
+        
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        const newLeft = initialLeft + deltaX;
+        const newTop = initialTop + deltaY;
+        
+        // 直接更新（requestAnimationFrame はブラウザが最適化）
+        windowEl.style.left = `${newLeft}px`;
+        windowEl.style.top = `${newTop}px`;
+    }
     
-    overlay.addEventListener('pointerup', (e) => {
-        overlay.releasePointerCapture(e.pointerId);
-        endDrag();
-    });
+    function endDrag(e) {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        windowEl.classList.remove('dragging');
+        
+        // Pointer capture を解放
+        if (currentPointerId !== null) {
+            try {
+                titleBar.releasePointerCapture(currentPointerId);
+            } catch (err) {
+                // Already released
+            }
+            currentPointerId = null;
+        }
+        
+        // オーバーレイを削除
+        if (overlay.parentNode) {
+            document.body.removeChild(overlay);
+        }
+    }
     
-    overlay.addEventListener('pointercancel', endDrag);
+    // Pointer Events で統一処理
+    titleBar.addEventListener('pointerdown', startDrag);
+    titleBar.addEventListener('pointermove', handleMove);
+    titleBar.addEventListener('pointerup', endDrag);
+    titleBar.addEventListener('pointercancel', endDrag);
+    titleBar.addEventListener('lostpointercapture', endDrag);
 }
 
 export function initWindowResize() {
@@ -105,7 +99,7 @@ export function initWindowResize() {
     let isResizing = false;
     let currentHandle = null;
     let startX, startY, startWidth, startHeight, startLeft, startTop;
-    let rafId = null;
+    let currentPointerId = null;
     
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
@@ -119,35 +113,37 @@ export function initWindowResize() {
     function startResize(e, handle) {
         // 最大化状態ではリサイズを開始しない
         if (windowEl.hasAttribute('data-maximized')) return;
+        
+        e.preventDefault();
+        
         isResizing = true;
         currentHandle = handle;
+        currentPointerId = e.pointerId;
         windowEl.classList.add('resizing');
         
         // Match cursor
         const cursor = window.getComputedStyle(handle).cursor;
         overlay.style.cursor = cursor;
         document.body.appendChild(overlay);
-
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
-        startX = clientX;
-        startY = clientY;
+        // Pointer capture を開始
+        handle.setPointerCapture(currentPointerId);
+
+        startX = e.clientX;
+        startY = e.clientY;
         
         const rect = windowEl.getBoundingClientRect();
         startWidth = rect.width;
         startHeight = rect.height;
         startLeft = rect.left;
         startTop = rect.top;
-        
-        e.preventDefault();
     }
 
-    function handleResize(clientX, clientY) {
+    function handleResize(e) {
         if (!isResizing) return;
         
-        const deltaX = clientX - startX;
-        const deltaY = clientY - startY;
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
         
         let newWidth = startWidth;
         let newHeight = startHeight;
@@ -185,15 +181,11 @@ export function initWindowResize() {
             }
         }
 
-        if (rafId === null) {
-            rafId = requestAnimationFrame(() => {
-                windowEl.style.width = `${newWidth}px`;
-                windowEl.style.height = `${newHeight}px`;
-                windowEl.style.left = `${newLeft}px`;
-                windowEl.style.top = `${newTop}px`;
-                rafId = null;
-            });
-        }
+        // 直接更新（requestAnimationFrame はブラウザが最適化）
+        windowEl.style.width = `${newWidth}px`;
+        windowEl.style.height = `${newHeight}px`;
+        windowEl.style.left = `${newLeft}px`;
+        windowEl.style.top = `${newTop}px`;
     }
 
     function endResize() {
@@ -201,32 +193,34 @@ export function initWindowResize() {
         
         isResizing = false;
         windowEl.classList.remove('resizing');
+        
+        // Pointer capture を解放
+        if (currentPointerId !== null) {
+            try {
+                currentHandle.releasePointerCapture(currentPointerId);
+            } catch (err) {
+                // Already released
+            }
+            currentPointerId = null;
+        }
+        
         if (overlay.parentNode) {
             document.body.removeChild(overlay);
-        }
-        if (rafId !== null) {
-            cancelAnimationFrame(rafId);
-            rafId = null;
         }
     }
 
     handles.forEach(handle => {
         handle.addEventListener('pointerdown', (e) => {
             if (windowEl.hasAttribute('data-maximized')) return;
-            e.preventDefault();
-            handle.setPointerCapture(e.pointerId);
             startResize(e, handle);
         });
+        
+        handle.addEventListener('pointermove', (e) => {
+            handleResize(e);
+        });
+        
+        handle.addEventListener('pointerup', endResize);
+        handle.addEventListener('pointercancel', endResize);
+        handle.addEventListener('lostpointercapture', endResize);
     });
-
-    overlay.addEventListener('pointermove', (e) => {
-        handleResize(e.clientX, e.clientY);
-    });
-    
-    overlay.addEventListener('pointerup', (e) => {
-        overlay.releasePointerCapture(e.pointerId);
-        endResize();
-    });
-    
-    overlay.addEventListener('pointercancel', endResize);
 }
