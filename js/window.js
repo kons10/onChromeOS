@@ -7,8 +7,6 @@ export function initWindowDrag() {
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
     let rafId = null;
-    let pendingLeft = 0;
-    let pendingTop = 0;
     
     // ドラッグ用オーバーレイ要素
     const overlay = document.createElement('div');
@@ -16,7 +14,7 @@ export function initWindowDrag() {
     overlay.style.inset = '0';
     overlay.style.zIndex = '9999';
     overlay.style.cursor = 'move';
-    overlay.style.backgroundColor = 'transparent'; // 透明に設定
+    overlay.style.backgroundColor = 'transparent';
 
     // 初期位置を設定
     const rect = windowEl.getBoundingClientRect();
@@ -45,65 +43,59 @@ export function initWindowDrag() {
         const deltaX = clientX - startX;
         const deltaY = clientY - startY;
         
-        pendingLeft = initialLeft + deltaX;
-        pendingTop = initialTop + deltaY;
+        const newLeft = initialLeft + deltaX;
+        const newTop = initialTop + deltaY;
         
-        if (!rafId) {
+        // requestAnimationFrame でスムーズに更新
+        if (rafId === null) {
             rafId = requestAnimationFrame(() => {
-                windowEl.style.left = `${pendingLeft}px`;
-                windowEl.style.top = `${pendingTop}px`;
+                windowEl.style.left = `${newLeft}px`;
+                windowEl.style.top = `${newTop}px`;
                 rafId = null;
             });
         }
     }
     
     function endDrag() {
-        if (isDragging) {
-            isDragging = false;
-            windowEl.classList.remove('dragging');
-            
-            // オーバーレイを削除
-            if (overlay.parentNode) {
-                document.body.removeChild(overlay);
-            }
-            
-            if (rafId) {
-                cancelAnimationFrame(rafId);
-                rafId = null;
-            }
+        if (!isDragging) return;
+        
+        isDragging = false;
+        windowEl.classList.remove('dragging');
+        
+        // オーバーレイを削除
+        if (overlay.parentNode) {
+            document.body.removeChild(overlay);
+        }
+        
+        if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
         }
     }
     
-    // マウスイベント (TitleBarで開始、Overlayで継続)
-    titleBar.addEventListener('mousedown', (e) => {
+    // ポインタイベントを使用してマウスとタッチを統一
+    titleBar.addEventListener('pointerdown', (e) => {
         // ボタン領域のクリックはドラッグを開始しない
         if (e.target.closest('.title-bar-right')) return;
         // 最大化状態ではドラッグを開始しない
         if (windowEl.hasAttribute('data-maximized')) return;
+        
+        e.preventDefault();
+        titleBar.setPointerCapture(e.pointerId);
         startDrag(e.clientX, e.clientY);
     });
     
-    // Overlayに対してMouseMoveとMouseUpをバインドするのがポイント
-    overlay.addEventListener('mousemove', (e) => {
+    // Overlay に対して PointerMove と PointerUp をバインド
+    overlay.addEventListener('pointermove', (e) => {
         handleMove(e.clientX, e.clientY);
     });
     
-    overlay.addEventListener('mouseup', endDrag);
+    overlay.addEventListener('pointerup', (e) => {
+        overlay.releasePointerCapture(e.pointerId);
+        endDrag();
+    });
     
-    // タッチイベント
-    titleBar.addEventListener('touchstart', (e) => {
-        if (e.target.closest('.title-bar-right')) return;
-        if (windowEl.hasAttribute('data-maximized')) return;
-        const touch = e.touches[0];
-        startDrag(touch.clientX, touch.clientY);
-    }, { passive: false });
-    
-    overlay.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        handleMove(touch.clientX, touch.clientY);
-    }, { passive: false });
-    
-    overlay.addEventListener('touchend', endDrag);
+    overlay.addEventListener('pointercancel', endDrag);
 }
 
 export function initWindowResize() {
@@ -193,7 +185,7 @@ export function initWindowResize() {
             }
         }
 
-        if (!rafId) {
+        if (rafId === null) {
             rafId = requestAnimationFrame(() => {
                 windowEl.style.width = `${newWidth}px`;
                 windowEl.style.height = `${newHeight}px`;
@@ -205,32 +197,36 @@ export function initWindowResize() {
     }
 
     function endResize() {
-        if (isResizing) {
-            isResizing = false;
-            windowEl.classList.remove('resizing');
-            if (overlay.parentNode) {
-                document.body.removeChild(overlay);
-            }
-            if (rafId) {
-                cancelAnimationFrame(rafId);
-                rafId = null;
-            }
+        if (!isResizing) return;
+        
+        isResizing = false;
+        windowEl.classList.remove('resizing');
+        if (overlay.parentNode) {
+            document.body.removeChild(overlay);
+        }
+        if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
         }
     }
 
     handles.forEach(handle => {
-        handle.addEventListener('mousedown', (e) => startResize(e, handle));
-        handle.addEventListener('touchstart', (e) => startResize(e, handle), { passive: false });
+        handle.addEventListener('pointerdown', (e) => {
+            if (windowEl.hasAttribute('data-maximized')) return;
+            e.preventDefault();
+            handle.setPointerCapture(e.pointerId);
+            startResize(e, handle);
+        });
     });
 
-    overlay.addEventListener('mousemove', (e) => {
+    overlay.addEventListener('pointermove', (e) => {
         handleResize(e.clientX, e.clientY);
     });
-    overlay.addEventListener('mouseup', endResize);
-
-    overlay.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        handleResize(touch.clientX, touch.clientY);
-    }, { passive: false });
-    overlay.addEventListener('touchend', endResize);
+    
+    overlay.addEventListener('pointerup', (e) => {
+        overlay.releasePointerCapture(e.pointerId);
+        endResize();
+    });
+    
+    overlay.addEventListener('pointercancel', endResize);
 }
