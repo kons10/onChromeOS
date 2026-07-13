@@ -27,6 +27,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     transition: box-shadow 0.3s ease;
+    z-index: 100;
 }
 
 .window.dragging,
@@ -34,15 +35,39 @@ body {
     transition: none;
 }
 
-.window md-elevation {
-    position: absolute;
-    inset: 0;
-    border-radius: 10px;
-    z-index: 0;
+/* フォーカス中のウィンドウ */
+.window.window-focused {
+    --md-elevation-level: 2;
 }
 
-.window:hover {
-    --md-elevation-level: 2;
+/* 最大化アニメーション */
+.window.maximizing {
+    transition: all 0.2s ease;
+}
+
+.window.maximized .resize-handle {
+    display: none;
+}
+
+.window.maximized {
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 0;
+}
+
+.window.maximized .window-content {
+    border-radius: 0;
+}
+
+.window.maximized .title-bar {
+    cursor: default;
+}
+
+/* 最小化アニメーション */
+.window.minimizing {
+    transition: all 0.2s ease;
 }
 
 .window-content {
@@ -55,6 +80,19 @@ body {
     overflow: hidden; 
     position: relative;
     z-index: 1;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* 閉じるアニメーション */
+.window-content.closing {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+/* 最小化アニメーション */
+.window-content.minimizing {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
 }
 
 .title-bar {

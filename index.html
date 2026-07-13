@@ -12,7 +12,7 @@
     
     <!-- Critical CSS inlined for faster FCP -->
     <style>
-        *{box-sizing:border-box}:root{--md-sys-color-primary:#1f6feb;--md-sys-color-on-surface:#202124;--md-sys-color-surface:#fff;--md-sys-color-surface-dim:#eee;--md-elevation-level:1}body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);margin:0;padding:40px;font-family:'Roboto',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:flex-start}.window{width:480px;height:600px;position:absolute;top:40px;left:50%;transform:translateX(-50%);transition:box-shadow .3s ease}.window.dragging,.window.resizing{transition:none}.window md-elevation{position:absolute;inset:0;border-radius:10px;z-index:0}.window:hover{--md-elevation-level:2}.window-content{display:flex;flex-direction:column;width:100%;height:100%;background:var(--md-sys-color-surface);border-radius:10px;overflow:hidden;position:relative;z-index:1}.title-bar{display:flex;align-items:center;justify-content:space-between;height:auto;padding:0 0 0 16px;background:var(--md-sys-color-surface-dim);border-bottom:1px solid #e0e0e0;cursor:move;user-select:none;-webkit-user-select:none;position:relative;z-index:1}.title-bar-left{display:flex;align-items:center;flex:1}.title-text{font-size:auto;font-weight:500;color:var(--md-sys-color-on-surface);letter-spacing:.25px}.title-bar-right{display:flex;align-items:center}md-icon-button{--md-icon-button-icon-size:20px}iframe{flex:1;border:none;background:#fff}.resize-handle{position:absolute;z-index:10}.handle-t{top:-4px;left:4px;right:4px;height:8px;cursor:ns-resize}.handle-b{bottom:-4px;left:4px;right:4px;height:8px;cursor:ns-resize}.handle-l{left:-4px;top:4px;bottom:4px;width:8px;cursor:ew-resize}.handle-r{right:-4px;top:4px;bottom:4px;width:8px;cursor:ew-resize}.handle-tl{top:-4px;left:-4px;width:8px;height:8px;cursor:nwse-resize}.handle-tr{top:-4px;right:-4px;width:8px;height:8px;cursor:nesw-resize}.handle-bl{bottom:-4px;left:-4px;width:8px;height:8px;cursor:nesw-resize}.handle-br{bottom:-4px;right:-4px;width:8px;height:8px;cursor:nwse-resize}
+        *{box-sizing:border-box}:root{--md-sys-color-primary:#1f6feb;--md-sys-color-on-surface:#202124;--md-sys-color-surface:#fff;--md-sys-color-surface-dim:#eee;--md-elevation-level:1}body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);margin:0;padding:40px;font-family:'Roboto',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:flex-start}.window{width:480px;height:600px;position:absolute;top:40px;left:50%;transform:translateX(-50%);transition:box-shadow .3s ease;z-index:100}.window.dragging,.window.resizing{transition:none}.window.window-focused{--md-elevation-level:2}.window.maximizing{transition:all .2s ease}.window.maximized .resize-handle{display:none}.window.maximized{width:100%;height:100%;left:0;top:0;border-radius:0}.window.maximized .window-content{border-radius:0}.window.maximized .title-bar{cursor:default}.window.minimizing{transition:all .2s ease}.window-content{display:flex;flex-direction:column;width:100%;height:100%;background:var(--md-sys-color-surface);border-radius:10px;overflow:hidden;position:relative;z-index:1;transition:opacity .2s ease,transform .2s ease}.window-content.closing{opacity:0;transform:scale(.95)}.window-content.minimizing{opacity:0;transform:scale(.8) translateY(20px)}.title-bar{display:flex;align-items:center;justify-content:space-between;height:auto;padding:0 0 0 16px;background:var(--md-sys-color-surface-dim);border-bottom:1px solid #e0e0e0;cursor:move;user-select:none;-webkit-user-select:none;position:relative;z-index:1}.title-bar-left{display:flex;align-items:center;flex:1}.title-text{font-size:auto;font-weight:500;color:var(--md-sys-color-on-surface);letter-spacing:.25px}.title-bar-right{display:flex;align-items:center}md-icon-button{--md-icon-button-icon-size:20px}iframe{flex:1;border:none;background:#fff}.resize-handle{position:absolute;z-index:10}.handle-t{top:-4px;left:4px;right:4px;height:8px;cursor:ns-resize}.handle-b{bottom:-4px;left:4px;right:4px;height:8px;cursor:ns-resize}.handle-l{left:-4px;top:4px;bottom:4px;width:8px;cursor:ew-resize}.handle-r{right:-4px;top:4px;bottom:4px;width:8px;cursor:ew-resize}.handle-tl{top:-4px;left:-4px;width:8px;height:8px;cursor:nwse-resize}.handle-tr{top:-4px;right:-4px;width:8px;height:8px;cursor:nesw-resize}.handle-bl{bottom:-4px;left:-4px;width:8px;height:8px;cursor:nesw-resize}.handle-br{bottom:-4px;right:-4px;width:8px;height:8px;cursor:nwse-resize}
     </style>
     
     <!-- Non-critical CSS loaded asynchronously -->
@@ -25,6 +25,7 @@
     <!-- JavaScript deferred -->
     <script src="js/mwc.js" type="module" defer></script>
     <script src="js/window.js" type="module" defer></script>
+    <script src="js/window-manager.js" type="module" defer></script>
 </head>
 <body>
     <main>
@@ -36,10 +37,10 @@
                         <div class="title-text">Calculator</div>
                     </div>
                     <div class="title-bar-right">
-                        <md-icon-button title="最小化" aria-label="最小化">
+                        <md-icon-button title="最小化" aria-label="最小化" data-minimize>
                             <md-icon></md-icon>
                         </md-icon-button>
-                        <md-icon-button title="最大化" aria-label="最大化">
+                        <md-icon-button title="最大化" aria-label="最大化" data-maximize>
                             <md-icon></md-icon>
                         </md-icon-button>
                         <md-icon-button title="閉じる" aria-label="閉じる" data-close>

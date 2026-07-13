@@ -1,4 +1,4 @@
-// window.js - ウィンドウのドラッグ＆ドロップ機能
+// window.js - ウィンドウのドラッグ＆リサイズ機能
 
 export function initWindowDrag() {
     const windowEl = document.querySelector('.window');
@@ -76,6 +76,10 @@ export function initWindowDrag() {
     
     // マウスイベント (TitleBarで開始、Overlayで継続)
     titleBar.addEventListener('mousedown', (e) => {
+        // ボタン領域のクリックはドラッグを開始しない
+        if (e.target.closest('.title-bar-right')) return;
+        // 最大化状態ではドラッグを開始しない
+        if (windowEl.hasAttribute('data-maximized')) return;
         startDrag(e.clientX, e.clientY);
     });
     
@@ -88,6 +92,8 @@ export function initWindowDrag() {
     
     // タッチイベント
     titleBar.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.title-bar-right')) return;
+        if (windowEl.hasAttribute('data-maximized')) return;
         const touch = e.touches[0];
         startDrag(touch.clientX, touch.clientY);
     }, { passive: false });
@@ -119,6 +125,8 @@ export function initWindowResize() {
     const minHeight = 200;
 
     function startResize(e, handle) {
+        // 最大化状態ではリサイズを開始しない
+        if (windowEl.hasAttribute('data-maximized')) return;
         isResizing = true;
         currentHandle = handle;
         windowEl.classList.add('resizing');
@@ -226,6 +234,3 @@ export function initWindowResize() {
     }, { passive: false });
     overlay.addEventListener('touchend', endResize);
 }
-
-initWindowDrag();
-initWindowResize();
