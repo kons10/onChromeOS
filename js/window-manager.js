@@ -1,6 +1,7 @@
 // window-manager.js - ウィンドウのボタン動作・Zインデックス管理
 
-import { initWindowDrag, initWindowResize } from './window.js';
+import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
+import { initWindowDrag, initWindowResize, createDragOptions } from './window.js';
 
 let zIndexCounter = 100;
 
@@ -57,12 +58,26 @@ function maximizeWindow(windowEl) {
         setTimeout(() => {
             windowEl.classList.remove('maximizing', 'maximized');
         }, 250);
+
+        // neodragインスタンスを再生成（transform の不整合を確実に解消）
+        if (windowEl._dragInstance) {
+            windowEl._dragInstance.destroy();
+            windowEl._dragInstance = new Draggable(windowEl, createDragOptions());
+        }
     } else {
         // 現在の位置を保存
         windowEl.dataset.savedLeft = windowEl.style.left;
         windowEl.dataset.savedTop = windowEl.style.top;
         windowEl.dataset.savedWidth = windowEl.style.width;
         windowEl.dataset.savedHeight = windowEl.style.height;
+
+        // neodragインスタンスを破棄（最大化中のtransform競合を回避）
+        if (windowEl._dragInstance) {
+            windowEl._dragInstance.destroy();
+            windowEl._dragInstance = null;
+        }
+        // neodragが付与したtransformをクリア（最大化レイアウトを確実に反映）
+        windowEl.style.transform = 'none';
 
         windowEl.classList.add('maximizing', 'maximized');
         windowEl.style.left = '0';
