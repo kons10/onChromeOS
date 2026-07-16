@@ -3,4 +3,5 @@ node_modules/
 *.log
 .env*
 .vscode/
+.zcode/
 !.env.example
