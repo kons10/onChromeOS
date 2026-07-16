@@ -5,6 +5,17 @@ import { initWindowDrag, initWindowResize, createDragOptions } from './window.js
 
 let zIndexCounter = 100;
 
+// zIndexCounterをグローバルに公開（shelf.jsからアクセス可能にする）
+window._zIndexCounter = zIndexCounter;
+
+/**
+ * 最大化ウィンドウの有無を判定し、シェルフモード変更イベントをdispatch。
+ */
+function notifyShelfModeChange() {
+    const hasLarge = document.querySelector('.window[data-maximized]') !== null;
+    window.dispatchEvent(new CustomEvent('shelf-mode-change', { detail: { hasLarge } }));
+}
+
 // ウィンドウを最前面にする
 function focusWindow(windowEl) {
     // 他のウィンドウからfocusedクラスを削除
@@ -14,6 +25,7 @@ function focusWindow(windowEl) {
 
     windowEl.classList.add('window-focused');
     windowEl.style.zIndex = ++zIndexCounter;
+    window._zIndexCounter = zIndexCounter;
 }
 
 // ウィンドウを閉じる
@@ -52,18 +64,20 @@ function maximizeWindow(windowEl) {
 
         windowEl.addEventListener('transitionend', () => {
             windowEl.classList.remove('maximizing', 'maximized');
+            notifyShelfModeChange();
         }, { once: true });
 
         // transitionendが発火しない場合の保険
         setTimeout(() => {
             windowEl.classList.remove('maximizing', 'maximized');
+            notifyShelfModeChange();
         }, 250);
 
-        // neodragインスタンスを再生成（transform の不整合を確実に解消）
+        // neodragインスタンスを再生成（最大化時に破棄されているため、無条件で再生成）
         if (windowEl._dragInstance) {
             windowEl._dragInstance.destroy();
-            windowEl._dragInstance = new Draggable(windowEl, createDragOptions());
         }
+        windowEl._dragInstance = new Draggable(windowEl, createDragOptions());
     } else {
         // 現在の位置を保存
         windowEl.dataset.savedLeft = windowEl.style.left;
@@ -88,10 +102,12 @@ function maximizeWindow(windowEl) {
 
         windowEl.addEventListener('transitionend', () => {
             windowEl.classList.remove('maximizing');
+            notifyShelfModeChange();
         }, { once: true });
 
         setTimeout(() => {
             windowEl.classList.remove('maximizing');
+            notifyShelfModeChange();
         }, 250);
     }
 }
