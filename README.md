@@ -82,6 +82,11 @@ ChromeOS のデスクトップ環境を Web ブラウザ上でシミュレート
 - モバイルブラウザでは操作性が制限される可能性があります
 - 実際の ChromeOS 機能（ファイル管理、設定など）は実装されていません
 
+## Special Thanks
+
+[@neodrag/vanilla Liblary](https://github.com/PuruVJ/neodrag)
+
+
 ## ライセンス
 
 MIT License
