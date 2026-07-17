@@ -59,6 +59,12 @@ export function initWindowResize() {
     function startResize(e, windowEl, handle) {
         // 最大化状態ではリサイズを開始しない
         if (windowEl.hasAttribute('data-maximized')) return;
+        
+        // Pointer capture を使用して iframe を含むすべての要素を通過してイベントを受信
+        if (e.target.setPointerCapture) {
+            e.target.setPointerCapture(e.pointerId || 1);
+        }
+        
         isResizing = true;
         activeWindow = windowEl;
         currentHandle = handle;
@@ -69,12 +75,14 @@ export function initWindowResize() {
         overlay.style.cursor = cursor;
         document.body.appendChild(overlay);
 
+        // DOM 読み取りは最初に一度だけ行う（レイアウトスラッシング防止）
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
         startX = clientX;
         startY = clientY;
 
+        // getBoundingClientRect はここで一度だけ呼び出し（読み取り操作）
         const rect = windowEl.getBoundingClientRect();
         startWidth = rect.width;
         startHeight = rect.height;
@@ -86,6 +94,9 @@ export function initWindowResize() {
 
     function handleResize(clientX, clientY) {
         if (!isResizing || !activeWindow) return;
+
+        // 前回の更新がまだ処理中の場合はスキップ（不要な再計算を防止）
+        if (rafId !== null) return;
 
         const windowEl = activeWindow;
         const deltaX = clientX - startX;
@@ -127,19 +138,24 @@ export function initWindowResize() {
             }
         }
 
-        if (!rafId) {
-            rafId = requestAnimationFrame(() => {
-                windowEl.style.width = `${newWidth}px`;
-                windowEl.style.height = `${newHeight}px`;
-                windowEl.style.left = `${newLeft}px`;
-                windowEl.style.top = `${newTop}px`;
-                rafId = null;
-            });
-        }
+        // requestAnimationFrame でブラウザの描画タイミングに同期
+        rafId = requestAnimationFrame(() => {
+            // すべての DOM 書き込みを一つのフレームにまとめる（レイアウトスラッシング防止）
+            windowEl.style.width = `${newWidth}px`;
+            windowEl.style.height = `${newHeight}px`;
+            windowEl.style.left = `${newLeft}px`;
+            windowEl.style.top = `${newTop}px`;
+            rafId = null;
+        });
     }
 
-    function endResize() {
+    function endResize(e) {
         if (isResizing) {
+            // Pointer capture の解放
+            if (e && e.target && e.target.releasePointerCapture) {
+                e.target.releasePointerCapture(e.pointerId || 1);
+            }
+            
             isResizing = false;
             if (activeWindow) {
                 activeWindow.classList.remove('resizing');
@@ -160,20 +176,17 @@ export function initWindowResize() {
     document.querySelectorAll('.window').forEach(windowEl => {
         const handles = windowEl.querySelectorAll('.resize-handle');
         handles.forEach(handle => {
-            handle.addEventListener('mousedown', (e) => startResize(e, windowEl, handle));
-            handle.addEventListener('touchstart', (e) => startResize(e, windowEl, handle), { passive: false });
+            // Pointer events を使用してより正確なポインター追跡を実現
+            handle.addEventListener('pointerdown', (e) => {
+                startResize(e, windowEl, handle);
+            });
         });
     });
 
     // overlay 上のポインター移動／終了を一度だけ取り付ける
-    overlay.addEventListener('mousemove', (e) => {
+    overlay.addEventListener('pointermove', (e) => {
         handleResize(e.clientX, e.clientY);
     });
-    overlay.addEventListener('mouseup', endResize);
-
-    overlay.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        handleResize(touch.clientX, touch.clientY);
-    }, { passive: false });
-    overlay.addEventListener('touchend', endResize);
+    overlay.addEventListener('pointerup', endResize);
+    overlay.addEventListener('pointercancel', endResize);
 }

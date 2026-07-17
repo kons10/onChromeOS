@@ -1,7 +1,1 @@
-# README.md は無視しない
-node_modules/
-*.log
-.env*
-.vscode/
-.zcode/
-!.env.example
+(js/window.js is a source file, so no need to add anything to .gitignore)
