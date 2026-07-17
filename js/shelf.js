@@ -1,5 +1,7 @@
 // shelf.js — ChromeOS Shelf（タスクバー）の初期化・ロジック
 
+import { focusWindow } from './window-manager.js';
+
 /**
  * hasLargeWindow の変更を監視してシェルフモードを切り替え。
  * window-manager.js 側で shelf-mode-change カスタムイベントをdispatchする。
@@ -71,13 +73,8 @@ function initAppButtons() {
                 windowEl.style.display = '';
             }
 
-            // フォーカス
-            windowEl.classList.add('window-focused');
-            windowEl.style.zIndex = ++window._zIndexCounter;
-            // 他のウィンドウからfocusedクラスを削除
-            document.querySelectorAll('.window-focused').forEach(el => {
-                if (el !== windowEl) el.classList.remove('window-focused');
-            });
+            // フォーカス（window-manager.js の中央集権的な実装に委譲）
+            focusWindow(windowEl);
         });
     });
 }
@@ -108,16 +105,9 @@ function initActiveAppTracking() {
 /**
  * シェルフシステム全体を初期化。
  */
-function initShelf() {
+export function initShelf() {
     initShelfModeListener();
     initClock();
     initAppButtons();
     initActiveAppTracking();
-
-    // zIndexCounterをグローバルにアクセス可能に（shelf.jsが最初に読まれた場合のため）
-    if (typeof window._zIndexCounter === 'undefined') {
-        window._zIndexCounter = 100;
-    }
 }
-
-initShelf();

@@ -39,27 +39,28 @@ export function initWindowDrag() {
 }
 
 export function initWindowResize() {
-    const windowEl = document.querySelector('.window');
-    const handles = document.querySelectorAll('.resize-handle');
+    const minWidth = 300;
+    const minHeight = 200;
 
-    let isResizing = false;
-    let currentHandle = null;
-    let startX, startY, startWidth, startHeight, startLeft, startTop;
-    let rafId = null;
-
+    // リサイズ中の状態はアクティブなウィンドウ1つ分だけ持つ。
+    // overlay はリサイズ開始時に body へ追加し、終了時に取り除く（元実装と同じ挙動）。
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
     overlay.style.inset = '0';
     overlay.style.zIndex = '9999';
     overlay.style.backgroundColor = 'transparent';
 
-    const minWidth = 300;
-    const minHeight = 200;
+    let isResizing = false;
+    let activeWindow = null;
+    let currentHandle = null;
+    let startX, startY, startWidth, startHeight, startLeft, startTop;
+    let rafId = null;
 
-    function startResize(e, handle) {
+    function startResize(e, windowEl, handle) {
         // 最大化状態ではリサイズを開始しない
         if (windowEl.hasAttribute('data-maximized')) return;
         isResizing = true;
+        activeWindow = windowEl;
         currentHandle = handle;
         windowEl.classList.add('resizing');
 
@@ -84,8 +85,9 @@ export function initWindowResize() {
     }
 
     function handleResize(clientX, clientY) {
-        if (!isResizing) return;
+        if (!isResizing || !activeWindow) return;
 
+        const windowEl = activeWindow;
         const deltaX = clientX - startX;
         const deltaY = clientY - startY;
 
@@ -139,7 +141,11 @@ export function initWindowResize() {
     function endResize() {
         if (isResizing) {
             isResizing = false;
-            windowEl.classList.remove('resizing');
+            if (activeWindow) {
+                activeWindow.classList.remove('resizing');
+            }
+            activeWindow = null;
+            currentHandle = null;
             if (overlay.parentNode) {
                 document.body.removeChild(overlay);
             }
@@ -150,11 +156,16 @@ export function initWindowResize() {
         }
     }
 
-    handles.forEach(handle => {
-        handle.addEventListener('mousedown', (e) => startResize(e, handle));
-        handle.addEventListener('touchstart', (e) => startResize(e, handle), { passive: false });
+    // 各ウィンドウ配下のリサイズハンドルを設定（複数ウィンドウ対応）
+    document.querySelectorAll('.window').forEach(windowEl => {
+        const handles = windowEl.querySelectorAll('.resize-handle');
+        handles.forEach(handle => {
+            handle.addEventListener('mousedown', (e) => startResize(e, windowEl, handle));
+            handle.addEventListener('touchstart', (e) => startResize(e, windowEl, handle), { passive: false });
+        });
     });
 
+    // overlay 上のポインター移動／終了を一度だけ取り付ける
     overlay.addEventListener('mousemove', (e) => {
         handleResize(e.clientX, e.clientY);
     });

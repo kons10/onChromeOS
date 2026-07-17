@@ -3,10 +3,18 @@
 import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
 import { initWindowDrag, initWindowResize, createDragOptions } from './window.js';
 
+// Zインデックスはこのモジュール内部でのみ管理される単調増加カウンタ。
+// かつて window._zIndexCounter でグローバル共有していたが、
+// モジュールのカプセル化のため nextZIndex() 経由で外部に公開する。
 let zIndexCounter = 100;
 
-// zIndexCounterをグローバルに公開（shelf.jsからアクセス可能にする）
-window._zIndexCounter = zIndexCounter;
+/**
+ * 次の Zインデックス値を返す（呼び出しのたびに単調増加）。
+ * shelf.js など外部からフォーカス時に利用する。
+ */
+export function nextZIndex() {
+    return ++zIndexCounter;
+}
 
 /**
  * 最大化ウィンドウの有無を判定し、シェルフモード変更イベントをdispatch。
@@ -17,15 +25,14 @@ function notifyShelfModeChange() {
 }
 
 // ウィンドウを最前面にする
-function focusWindow(windowEl) {
+export function focusWindow(windowEl) {
     // 他のウィンドウからfocusedクラスを削除
     document.querySelectorAll('.window-focused').forEach(el => {
         el.classList.remove('window-focused');
     });
 
     windowEl.classList.add('window-focused');
-    windowEl.style.zIndex = ++zIndexCounter;
-    window._zIndexCounter = zIndexCounter;
+    windowEl.style.zIndex = nextZIndex();
 }
 
 // ウィンドウを閉じる
@@ -134,7 +141,7 @@ function minimizeWindow(windowEl) {
 }
 
 // 各ウィンドウの初期化
-function initWindowManager() {
+export function initWindowManager() {
     const windows = document.querySelectorAll('.window');
 
     windows.forEach(windowEl => {
@@ -162,5 +169,3 @@ function initWindowManager() {
     initWindowDrag();
     initWindowResize();
 }
-
-initWindowManager();
