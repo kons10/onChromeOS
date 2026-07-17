@@ -7,7 +7,7 @@ const DEFAULT_APPS = {
     calculator: { title: 'Calculator', url: 'https://gcalc.pages.dev/' },
     browser: { title: 'Browser', url: 'https://www.google.com/search?igu=1' },
     mail: { title: 'Mail', url: 'https://mail.google.com/' },
-    calendar: { title: 'Calendar', url: 'https://calendar.google.com/' },
+    calendar: { title: 'Calendar', url: 'https://calendar.zyn.f5.si/' },
     chat: { title: 'Chat', url: 'https://chat.google.com/' }
 };
 
