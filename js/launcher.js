@@ -152,15 +152,48 @@ function isValidUrl(url) {
     }
 }
 
+// カスケード配置のオフセット計算
+function getCascadePosition(windowWidth, windowHeight) {
+    const existingWindows = document.querySelectorAll('.window:not([data-minimized])');
+    const cascadeOffset = 30; // ウィンドウごとのズレ幅
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const shelfHeight = 48;
+
+    // 初期位置：ビューポートの中央
+    let baseX = Math.max(40, (viewportWidth - windowWidth) / 2);
+    let baseY = Math.max(20, (viewportHeight - shelfHeight - windowHeight) / 2);
+
+    // 既存ウィンドウの数だけオフセットを加算
+    const offset = existingWindows.length * cascadeOffset;
+
+    let x = baseX + offset;
+    let y = baseY + offset;
+
+    // 画面内に収まるよう制約
+    x = Math.min(x, viewportWidth - windowWidth - 40);
+    y = Math.min(y, viewportHeight - shelfHeight - windowHeight - 20);
+
+    // 最小位置を保証
+    x = Math.max(20, x);
+    y = Math.max(10, y);
+
+    return { x, y };
+}
+
 // 新しいウィンドウ要素を作成
 function createWindowElement(appId, url, title) {
+    const windowWidth = 800;
+    const windowHeight = 600;
+    const { x, y } = getCascadePosition(windowWidth, windowHeight);
+
     const windowEl = document.createElement('div');
     windowEl.className = 'window';
     windowEl.dataset.appId = appId;
-    windowEl.style.left = '100px';
-    windowEl.style.top = '100px';
-    windowEl.style.width = '800px';
-    windowEl.style.height = '600px';
+    windowEl.style.left = `${x}px`;
+    windowEl.style.top = `${y}px`;
+    windowEl.style.width = `${windowWidth}px`;
+    windowEl.style.height = `${windowHeight}px`;
     windowEl.style.zIndex = nextZIndex();
 
     windowEl.innerHTML = `
