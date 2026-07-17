@@ -9,6 +9,10 @@ import './mwc.js';
 // window.js は明示的に import しなくても連鎖的に読み込まれる。
 import { initWindowManager } from './window-manager.js';
 import { initShelf } from './shelf.js';
+import { initLauncher } from './launcher.js';
 
-initWindowManager();
-initShelf();
+document.addEventListener('DOMContentLoaded', () => {
+    initWindowManager();
+    initShelf();
+    initLauncher();
+});

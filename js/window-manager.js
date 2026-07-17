@@ -42,13 +42,19 @@ function closeWindow(windowEl) {
 
     content.addEventListener('transitionend', () => {
         content.classList.remove('closing');
-        windowEl.style.display = 'none';
+        windowEl.remove();
+        notifyShelfModeChange();
+        window.dispatchEvent(new CustomEvent('window-closed', { detail: { appId: windowEl.dataset.appId } }));
     }, { once: true });
 
     // transitionendが発火しない場合の保険
     setTimeout(() => {
-        content.classList.remove('closing');
-        windowEl.style.display = 'none';
+        if (windowEl.parentNode) {
+            content.classList.remove('closing');
+            windowEl.remove();
+            notifyShelfModeChange();
+            window.dispatchEvent(new CustomEvent('window-closed', { detail: { appId: windowEl.dataset.appId } }));
+        }
     }, 250);
 }
 

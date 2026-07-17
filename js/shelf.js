@@ -1,6 +1,15 @@
 // shelf.js — ChromeOS Shelf（タスクバー）の初期化・ロジック
 
 import { focusWindow } from './window-manager.js';
+import { createNewWindow } from './launcher.js';
+
+const DEFAULT_APPS = {
+    calculator: { title: 'Calculator', url: 'https://gcalc.pages.dev/' },
+    browser: { title: 'Browser', url: 'https://www.google.com/search?igu=1' },
+    mail: { title: 'Mail', url: 'https://mail.google.com/' },
+    calendar: { title: 'Calendar', url: 'https://calendar.google.com/' },
+    chat: { title: 'Chat', url: 'https://chat.google.com/' }
+};
 
 /**
  * hasLargeWindow の変更を監視してシェルフモードを切り替え。
@@ -59,7 +68,15 @@ function initAppButtons() {
             const appId = btn.dataset.appId;
             if (!appId) return;
 
-            const windowEl = document.querySelector(`.window[data-app-id="${appId}"]`);
+            let windowEl = document.querySelector(`.window[data-app-id="${appId}"]`);
+            if (!windowEl) {
+                // ウィンドウがDOMから削除されている場合は、デフォルト定義に基づいて再作成する
+                const appConfig = DEFAULT_APPS[appId];
+                if (appConfig) {
+                    windowEl = createNewWindow(appConfig.url, appConfig.title, appId);
+                }
+            }
+
             if (!windowEl) return;
 
             // 最小化されていれば復元
@@ -73,7 +90,7 @@ function initAppButtons() {
                 windowEl.style.display = '';
             }
 
-            // フォーカス（window-manager.js の中央集権的な実装に委譲）
+            // フォーカス
             focusWindow(windowEl);
         });
     });
@@ -83,10 +100,7 @@ function initAppButtons() {
  * アクティブウィンドウに対応するシェルフボタンのインジケーターを更新。
  */
 function initActiveAppTracking() {
-    document.addEventListener('mousedown', () => updateActiveApp());
-    document.addEventListener('touchstart', () => updateActiveApp(), { passive: true });
-
-    function updateActiveApp() {
+    const updateActiveApp = () => {
         // focusedウィンドウのapp-idを取得
         const focusedWindow = document.querySelector('.window.window-focused');
         const focusedAppId = focusedWindow?.dataset?.appId || '';
@@ -99,7 +113,20 @@ function initActiveAppTracking() {
                 btn.classList.remove('active-app');
             }
         });
-    }
+    };
+
+    document.addEventListener('mousedown', updateActiveApp);
+    document.addEventListener('touchstart', updateActiveApp, { passive: true });
+    
+    // ウィンドウが閉じられた時の追従
+    window.addEventListener('window-closed', (e) => {
+        const appId = e.detail.appId;
+        const btn = document.querySelector(`.shelf-app-btn[data-app-id="${appId}"]`);
+        if (btn) {
+            btn.classList.remove('active-app');
+        }
+        updateActiveApp();
+    });
 }
 
 /**
