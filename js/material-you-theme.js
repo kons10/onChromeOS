@@ -72,8 +72,12 @@ function showStartupThemeDialog() {
     const dialog = overlay.querySelector('.theme-dialog');
 
     updateSelectedOption(dialog, selectedMode);
-    requestAnimationFrame(() => overlay.classList.add('visible'));
-
+    requestAnimationFrame(() => {
+        overlay.classList.add('visible');
+        overlay.setAttribute('tabindex', '-1');
+        overlay.style.outline = 'none';
+        overlay.focus();
+    });
     dialog.addEventListener('click', (event) => {
         const modeButton = event.target.closest('[data-theme-mode]');
         if (modeButton) {
