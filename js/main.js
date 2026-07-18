@@ -10,9 +10,11 @@ import './mwc.js';
 import { initWindowManager } from './window-manager.js';
 import { initShelf } from './shelf.js';
 import { initLauncher } from './launcher.js';
+import { initMaterialYouTheme } from './material-you-theme.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initWindowManager();
     initShelf();
     initLauncher();
+    initMaterialYouTheme();
 });
