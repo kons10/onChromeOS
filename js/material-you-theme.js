@@ -37,7 +37,8 @@ const THEME_DIALOG_HTML = `
 
 function setCssVariables(target, values) {
     Object.entries(values).forEach(([key, value]) => {
-        target.style.setProperty(`--md-sys-color-${key.replaceAll('_', '-')}`, hexFromArgb(value));
+        const kebabKey = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+        target.style.setProperty(`--md-sys-color-${kebabKey}`, hexFromArgb(value));
     });
 }
 
