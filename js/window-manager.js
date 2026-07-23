@@ -36,7 +36,7 @@ export function focusWindow(windowEl) {
 }
 
 // ウィンドウを閉じる
-function closeWindow(windowEl) {
+export function closeWindow(windowEl) {
     const content = windowEl.querySelector('.window-content');
     content.classList.add('closing');
 
@@ -59,7 +59,7 @@ function closeWindow(windowEl) {
 }
 
 // ウィンドウの最大化トグル
-function maximizeWindow(windowEl) {
+export function maximizeWindow(windowEl) {
     const isMaximized = windowEl.hasAttribute('data-maximized');
 
     if (isMaximized) {
@@ -126,7 +126,7 @@ function maximizeWindow(windowEl) {
 }
 
 // ウィンドウの最小化
-function minimizeWindow(windowEl) {
+export function minimizeWindow(windowEl) {
     const content = windowEl.querySelector('.window-content');
     windowEl.classList.add('minimizing');
     content.classList.add('minimizing');
@@ -146,29 +146,34 @@ function minimizeWindow(windowEl) {
     }, 250);
 }
 
+// ウィンドウのボタンイベントとフォーカスを設定
+export function setupWindowButtons(windowEl) {
+    // クリックでフォーカス
+    windowEl.addEventListener('mousedown', () => focusWindow(windowEl));
+    windowEl.addEventListener('touchstart', () => focusWindow(windowEl), { passive: true });
+
+    // 閉じるボタン
+    windowEl.querySelector('[data-close]')?.addEventListener('click', () => {
+        closeWindow(windowEl);
+    });
+
+    // 最大化ボタン
+    windowEl.querySelector('[data-maximize]')?.addEventListener('click', () => {
+        maximizeWindow(windowEl);
+    });
+
+    // 最小化ボタン
+    windowEl.querySelector('[data-minimize]')?.addEventListener('click', () => {
+        minimizeWindow(windowEl);
+    });
+}
+
 // 各ウィンドウの初期化
 export function initWindowManager() {
     const windows = document.querySelectorAll('.window');
 
     windows.forEach(windowEl => {
-        // クリックでフォーカス
-        windowEl.addEventListener('mousedown', () => focusWindow(windowEl));
-        windowEl.addEventListener('touchstart', () => focusWindow(windowEl), { passive: true });
-
-        // 閉じるボタン
-        windowEl.querySelector('[data-close]')?.addEventListener('click', () => {
-            closeWindow(windowEl);
-        });
-
-        // 最大化ボタン
-        windowEl.querySelector('[data-maximize]')?.addEventListener('click', () => {
-            maximizeWindow(windowEl);
-        });
-
-        // 最小化ボタン
-        windowEl.querySelector('[data-minimize]')?.addEventListener('click', () => {
-            minimizeWindow(windowEl);
-        });
+        setupWindowButtons(windowEl);
     });
 
     // ドラッグ＆リサイズを初期化

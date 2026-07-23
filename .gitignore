@@ -4,4 +4,5 @@ node_modules/
 .env*
 .vscode/
 .zcode/
+.freebuff/
 !.env.example

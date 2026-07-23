@@ -1,6 +1,6 @@
 // launcher.js - ランチャー（Everythingボタン）のダイアログとウィンドウ作成
 
-import { focusWindow, nextZIndex } from './window-manager.js';
+import { focusWindow, nextZIndex, closeWindow, maximizeWindow, minimizeWindow, setupWindowButtons } from './window-manager.js';
 import { initWindowDrag, initWindowResize, createDragOptions } from './window.js';
 import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
 
@@ -204,13 +204,13 @@ function createWindowElement(appId, url, title) {
                 </div>
                 <div class="title-bar-right">
                     <md-icon-button title="Minimize" aria-label="Minimize" data-minimize>
-                        <md-icon></md-icon>
+                        <md-icon></md-icon>
                     </md-icon-button>
                     <md-icon-button title="Maximize" aria-label="Maximize" data-maximize>
-                        <md-icon></md-icon>
+                        <md-icon></md-icon>
                     </md-icon-button>
                     <md-icon-button title="Close" aria-label="Close" data-close>
-                        <md-icon></md-icon>
+                        <md-icon></md-icon>
                     </md-icon-button>
                 </div>
             </div>
@@ -247,7 +247,7 @@ function addShelfAppButton(appId, title) {
     btn.dataset.appId = appId;
     btn.title = title;
     btn.setAttribute('aria-label', title);
-    btn.innerHTML = `<md-icon class="shelf-icon"></md-icon>`;
+    btn.innerHTML = `<md-icon class="shelf-icon"></md-icon>`;
 
     // 既存のボタンと同じ動作を付与
     btn.addEventListener('click', () => {
@@ -265,6 +265,18 @@ function addShelfAppButton(appId, title) {
     });
 
     shelfCenter.appendChild(btn);
+}
+
+// ウィンドウが閉じられた時のシェルフボタン自動削除（カスタムアプリのみ）
+function initWindowClosedListener() {
+    window.addEventListener('window-closed', (e) => {
+        const appId = e.detail.appId;
+        // 動的に作られたカスタムアプリのみシェルフボタンを削除
+        if (appId && appId.startsWith('app-')) {
+            const btn = document.querySelector(`.shelf-app-btn[data-app-id="${appId}"]`);
+            if (btn) btn.remove();
+        }
+    });
 }
 
 // ダイアログを表示
@@ -350,7 +362,7 @@ export function createNewWindow(url, title, appId) {
     const windowEl = createWindowElement(appId, url, title);
     document.querySelector('main').appendChild(windowEl);
 
-    // ウィンドウのボタンイベントを設定（window-manager.jsのロジックを再利用）
+    // ウィンドウのボタンイベントを設定（window-manager.js の共有関数を利用）
     setupWindowButtons(windowEl);
 
     // ドラッグ・リサイズを初期化
@@ -372,136 +384,6 @@ export function createNewWindow(url, title, appId) {
     }
     
     return windowEl;
-}
-
-// window-manager.js のボタン設定ロジックをここに複製（または共有関数化）
-function setupWindowButtons(windowEl) {
-    // 閉じるボタン
-    windowEl.querySelector('[data-close]')?.addEventListener('click', () => {
-        closeWindow(windowEl);
-    });
-
-    // 最大化ボタン
-    windowEl.querySelector('[data-maximize]')?.addEventListener('click', () => {
-        maximizeWindow(windowEl);
-    });
-
-    // 最小化ボタン
-    windowEl.querySelector('[data-minimize]')?.addEventListener('click', () => {
-        minimizeWindow(windowEl);
-    });
-
-    // クリックでフォーカス
-    windowEl.addEventListener('mousedown', () => focusWindow(windowEl));
-    windowEl.addEventListener('touchstart', () => focusWindow(windowEl), { passive: true });
-}
-
-// window-manager.js の close/maximize/minimize をローカルに複製（依存を避けるため）
-function closeWindow(windowEl) {
-    const content = windowEl.querySelector('.window-content');
-    content.classList.add('closing');
-    content.addEventListener('transitionend', () => {
-        content.classList.remove('closing');
-        windowEl.remove();
-        // シェルフボタンも削除（動的に作られたカスタムアプリのみ）
-        const appId = windowEl.dataset.appId;
-        if (appId.startsWith('app-')) {
-            document.querySelector(`.shelf-app-btn[data-app-id="${appId}"]`)?.remove();
-        }
-        window.dispatchEvent(new CustomEvent('window-closed', { detail: { appId } }));
-    }, { once: true });
-    setTimeout(() => {
-        if (windowEl.parentNode) {
-            content.classList.remove('closing');
-            windowEl.remove();
-            const appId = windowEl.dataset.appId;
-            if (appId.startsWith('app-')) {
-                document.querySelector(`.shelf-app-btn[data-app-id="${appId}"]`)?.remove();
-            }
-            window.dispatchEvent(new CustomEvent('window-closed', { detail: { appId } }));
-        }
-    }, 250);
-}
-
-function maximizeWindow(windowEl) {
-    const isMaximized = windowEl.hasAttribute('data-maximized');
-    const notifyShelfModeChange = () => {
-        const hasLarge = document.querySelector('.window[data-maximized]') !== null;
-        window.dispatchEvent(new CustomEvent('shelf-mode-change', { detail: { hasLarge } }));
-    };
-
-    if (isMaximized) {
-        windowEl.classList.add('maximizing');
-        windowEl.style.left = windowEl.dataset.savedLeft;
-        windowEl.style.top = windowEl.dataset.savedTop;
-        windowEl.style.width = windowEl.dataset.savedWidth;
-        windowEl.style.height = windowEl.dataset.savedHeight;
-        windowEl.removeAttribute('data-maximized');
-        delete windowEl.dataset.savedLeft;
-        delete windowEl.dataset.savedTop;
-        delete windowEl.dataset.savedWidth;
-        delete windowEl.dataset.savedHeight;
-
-        windowEl.addEventListener('transitionend', () => {
-            windowEl.classList.remove('maximizing', 'maximized');
-            notifyShelfModeChange();
-        }, { once: true });
-        setTimeout(() => {
-            windowEl.classList.remove('maximizing', 'maximized');
-            notifyShelfModeChange();
-        }, 250);
-
-        if (windowEl._dragInstance) {
-            windowEl._dragInstance.destroy();
-        }
-        windowEl._dragInstance = new Draggable(windowEl, createDragOptions());
-    } else {
-        windowEl.dataset.savedLeft = windowEl.style.left;
-        windowEl.dataset.savedTop = windowEl.style.top;
-        windowEl.dataset.savedWidth = windowEl.style.width;
-        windowEl.dataset.savedHeight = windowEl.style.height;
-
-        if (windowEl._dragInstance) {
-            windowEl._dragInstance.destroy();
-            windowEl._dragInstance = null;
-        }
-        windowEl.style.transform = 'none';
-
-        windowEl.classList.add('maximizing', 'maximized');
-        windowEl.style.left = '0';
-        windowEl.style.top = '0';
-        windowEl.style.width = '100%';
-        windowEl.style.height = '100%';
-        windowEl.setAttribute('data-maximized', '');
-
-        windowEl.addEventListener('transitionend', () => {
-            windowEl.classList.remove('maximizing');
-            notifyShelfModeChange();
-        }, { once: true });
-        setTimeout(() => {
-            windowEl.classList.remove('maximizing');
-            notifyShelfModeChange();
-        }, 250);
-    }
-}
-
-function minimizeWindow(windowEl) {
-    const content = windowEl.querySelector('.window-content');
-    windowEl.classList.add('minimizing');
-    content.classList.add('minimizing');
-
-    content.addEventListener('transitionend', () => {
-        content.classList.remove('minimizing');
-        windowEl.classList.remove('minimizing');
-        windowEl.style.display = 'none';
-        windowEl.setAttribute('data-minimized', '');
-    }, { once: true });
-    setTimeout(() => {
-        content.classList.remove('minimizing');
-        windowEl.classList.remove('minimizing');
-        windowEl.style.display = 'none';
-        windowEl.setAttribute('data-minimized', '');
-    }, 250);
 }
 
 // リサイズハンドルの設定（window.jsのinitWindowResizeから必要な部分を抽出・調整）
@@ -642,4 +524,7 @@ export function initLauncher() {
     }
 
     launcherBtn.addEventListener('click', showLauncherDialog);
+
+    // ウィンドウが閉じられた時のシェルフボタン自動削除を初期化
+    initWindowClosedListener();
 }
