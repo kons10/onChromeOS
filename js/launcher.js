@@ -204,13 +204,13 @@ function createWindowElement(appId, url, title) {
                 </div>
                 <div class="title-bar-right">
                     <md-icon-button title="Minimize" aria-label="Minimize" data-minimize>
-                        <md-icon></md-icon>
+                        <md-icon></md-icon>
                     </md-icon-button>
                     <md-icon-button title="Maximize" aria-label="Maximize" data-maximize>
-                        <md-icon></md-icon>
+                        <md-icon></md-icon>
                     </md-icon-button>
                     <md-icon-button title="Close" aria-label="Close" data-close>
-                        <md-icon></md-icon>
+                        <md-icon></md-icon>
                     </md-icon-button>
                 </div>
             </div>
