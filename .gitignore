@@ -1,1 +1,8 @@
-(js/launcher.js)
+# README.md は無視しない
+node_modules/
+*.log
+.env*
+.vscode/
+.zcode/
+.freebuff/
+!.env.example
