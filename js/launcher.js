@@ -1,7 +1,7 @@
 // launcher.js - ランチャー（Everythingボタン）のダイアログとウィンドウ作成
 
 import { focusWindow, nextZIndex, closeWindow, maximizeWindow, minimizeWindow, setupWindowButtons } from './window-manager.js';
-import { initWindowDrag, initWindowResize, createDragOptions } from './window.js';
+import { initWindowDrag, createDragOptions } from './window.js';
 import { Draggable } from '@neodrag/vanilla';
 
 // ダイアログ用のHTMLテンプレート
@@ -372,8 +372,6 @@ export function createNewWindow(url, title, appId) {
     windowEl.style.transform = 'none';
     windowEl._dragInstance = new Draggable(windowEl, createDragOptions());
 
-    // リサイズハンドルを設定
-    setupResizeHandles(windowEl);
 
     // フォーカス
     focusWindow(windowEl);

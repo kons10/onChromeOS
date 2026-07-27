@@ -157,6 +157,7 @@ export function initWindowResize() {
     }
 
     // 各ウィンドウ配下のリサイズハンドルを設定（複数ウィンドウ対応）
+    // 注意：この関数は一度だけ呼び出されることを想定
     document.querySelectorAll('.window').forEach(windowEl => {
         const handles = windowEl.querySelectorAll('.resize-handle');
         handles.forEach(handle => {
