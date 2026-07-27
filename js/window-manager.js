@@ -1,6 +1,6 @@
 // window-manager.js - ウィンドウのボタン動作・Zインデックス管理
 
-import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
+import { Draggable } from '@neodrag/vanilla';
 import { initWindowDrag, initWindowResize, createDragOptions } from './window.js';
 
 // Zインデックスはこのモジュール内部でのみ管理される単調増加カウンタ。

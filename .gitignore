@@ -1,8 +1,22 @@
-# README.md は無視しない
+```
+# Build artifacts
+dist/
+build/
+*.js.map
+
+# Dependencies
 node_modules/
-*.log
-.env*
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
 .vscode/
-.zcode/
-.freebuff/
-!.env.example
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
+```

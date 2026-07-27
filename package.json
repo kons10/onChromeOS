@@ -1,15 +1,23 @@
 {
-  "name": "workspace",
+  "name": "chromeos-web-dummy",
   "version": "1.0.0",
-  "main": "lighthouserc.js",
+  "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "ChromeOS Web Dummy - A fork of ChromeOS using web technologies",
   "devDependencies": {
-    "@lhci/cli": "^0.15.1"
+    "@lhci/cli": "^0.15.1",
+    "@material/web": "^2.5.0",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@neodrag/vanilla": "^2.3.1"
   }
 }

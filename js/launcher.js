@@ -2,7 +2,7 @@
 
 import { focusWindow, nextZIndex, closeWindow, maximizeWindow, minimizeWindow, setupWindowButtons } from './window-manager.js';
 import { initWindowDrag, initWindowResize, createDragOptions } from './window.js';
-import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
+import { Draggable } from '@neodrag/vanilla';
 
 // ダイアログ用のHTMLテンプレート
 const DIALOG_HTML = `

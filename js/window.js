@@ -1,5 +1,5 @@
 // window.js - ウィンドウのドラッグ＆リサイズ機能
-import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
+import { Draggable } from '@neodrag/vanilla';
 
 // ドラッグの neodrag オプションを生成（インスタンスの生成・再生成で共通利用）
 export function createDragOptions() {
