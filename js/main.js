@@ -3,7 +3,7 @@
 // ここから明示的に呼び出すことでテスト容易性と再利用性を高める。
 
 // Material Web Components（副作用のみの外部バンドル）
-import '../npmbundle/material.web.mjs';
+import './npmbundle/material.web.mjs';
 
 // window-manager.js は内部で window.js を import するため、
 // window.js は明示的に import しなくても連鎖的に読み込まれる。

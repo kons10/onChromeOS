@@ -7,7 +7,46 @@ dist/
 build/
 target/
 
-# Compressed files
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+target/
+
+# C/C++
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.exe
+*.out
+
+# Compression
 *.zip
 *.gz
 *.tar
@@ -26,8 +65,17 @@ target/
 *.Z
 *.lz
 *.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Testing
+.mypy_cache/
+.pytest_cache/
 ```
