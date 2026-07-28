@@ -1,8 +1,1 @@
-# README.md は無視しない
-node_modules/
-*.log
-.env*
-.vscode/
-.zcode/
-.freebuff/
-!.env.example
+Nothing needs to be added to the .gitignore file based on the provided changes. The only modified file is 'js/main.js', which is a source code file and should not be ignored. There are no build artifacts, dependencies, or temporary files in the changes that would require adding ignore rules.
