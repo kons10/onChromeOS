@@ -7,9 +7,9 @@ import './npmbundle/material.web.mjs';
 
 // window-manager.js は内部で window.js を import するため、
 // window.js は明示的に import しなくても連鎖的に読み込まれる。
-import { initWindowManager } from './window-manager.js';
-import { initShelf } from './shelf.js';
-import { initLauncher } from './launcher.js';
+import { initWindowManager } from './vanilla/window-manager.js';
+import { initShelf } from './vanilla/shelf.js';
+import { initLauncher } from './vanilla/launcher.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initWindowManager();
