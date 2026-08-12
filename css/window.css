@@ -1,23 +1,4 @@
-* { box-sizing: border-box; }
-
-:root {
-    --md-sys-color-primary: #1f6feb;
-    --md-sys-color-on-surface: #202124;
-    --md-sys-color-surface: #ffffff;
-    --md-sys-color-surface-dim: #eeeeee;
-    --md-elevation-level: 1;
-}
-
-body { 
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    margin: 0; 
-    padding: 40px; 
-    font-family: 'Roboto', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-}
+/* window.css — ウィンドウの枠、タイトルバー、ボタンなど */
 
 .window {
     width: 480px; 
@@ -130,12 +111,6 @@ body {
 
 md-icon-button {
     --md-icon-button-icon-size: 20px;
-}
-
-iframe { 
-    flex: 1; 
-    border: none;
-    background: white;
 }
 
 .resize-handle {
