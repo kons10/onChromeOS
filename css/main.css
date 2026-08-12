@@ -1,0 +1,29 @@
+/* main.css — メインスタイル、変数定義、リセット */
+
+* { 
+    box-sizing: border-box; 
+}
+
+:root {
+    --md-sys-color-primary: #1f6feb;
+    --md-sys-color-on-surface: #202124;
+    --md-sys-color-surface: #ffffff;
+    --md-sys-color-surface-dim: #eeeeee;
+    --md-elevation-level: 1;
+}
+
+body { 
+    margin: 0; 
+    padding: 40px; 
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+iframe { 
+    flex: 1; 
+    border: none;
+    background: white;
+}
