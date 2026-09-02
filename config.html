@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="onChromeOS settings">
+    <title>設定 - onChromeOS</title>
+
+    <script type="module" src="js/npmbundle/material.web.mjs"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #1f6feb;
+            --primary-container: #dbeafe;
+            --surface: #f8f9fa;
+            --surface-container: #ffffff;
+            --surface-container-high: #f1f3f4;
+            --on-surface: #202124;
+            --on-surface-variant: #5f6368;
+            --outline: #dadce0;
+            --danger: #b3261e;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body { min-height: 100%; }
+
+        body {
+            margin: 0;
+            background: var(--surface);
+            color: var(--on-surface);
+            font-family: Roboto, system-ui, sans-serif;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 28px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            border-bottom: 1px solid var(--outline);
+            backdrop-filter: blur(16px);
+        }
+
+        .back-button {
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--on-surface);
+            cursor: pointer;
+        }
+
+        .back-button:hover { background: var(--surface-container-high); }
+
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-size: 24px;
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .title { font-size: 22px; font-weight: 500; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 760px);
+            gap: 40px;
+            width: min(1120px, calc(100% - 48px));
+            margin: 32px auto 64px;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 104px;
+            align-self: start;
+        }
+
+        .search {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--outline);
+            border-radius: 24px;
+            background: var(--surface-container);
+        }
+
+        .search input {
+            min-width: 0;
+            flex: 1;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+        }
+
+        .nav {
+            margin-top: 20px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .nav a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: var(--on-surface-variant);
+            text-decoration: none;
+            border-radius: 24px;
+        }
+
+        .nav a:hover, .nav a.active {
+            background: var(--primary-container);
+            color: var(--on-surface);
+        }
+
+        main h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+            font-weight: 500;
+        }
+
+        .intro {
+            margin: 0 0 28px;
+            color: var(--on-surface-variant);
+        }
+
+        .section {
+            scroll-margin-top: 96px;
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            margin: 0 0 10px 4px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .card {
+            overflow: hidden;
+            border: 1px solid var(--outline);
+            border-radius: 20px;
+            background: var(--surface-container);
+        }
+
+        .setting {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+        }
+
+        .setting + .setting { border-top: 1px solid var(--outline); }
+
+        .setting-icon {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--surface-container-high);
+        }
+
+        .setting-text { flex: 1; min-width: 0; }
+        .setting-title { font-size: 16px; font-weight: 500; }
+        .setting-description { margin-top: 4px; color: var(--on-surface-variant); font-size: 13px; line-height: 1.45; }
+
+        .select, .text-input {
+            min-width: 150px;
+            padding: 10px 12px;
+            border: 1px solid var(--outline);
+            border-radius: 10px;
+            background: var(--surface-container);
+            color: inherit;
+            font: inherit;
+        }
+
+        .switch {
+            position: relative;
+            width: 52px;
+            height: 32px;
+            flex: 0 0 52px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            border: 2px solid var(--on-surface-variant);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 4px;
+            top: 4px;
+            border-radius: 50%;
+            background: var(--on-surface-variant);
+            transition: .2s;
+        }
+
+        .switch input:checked + .slider {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        .switch input:checked + .slider::before {
+            transform: translateX(20px);
+            background: white;
+        }
+
+        .danger { color: var(--danger); }
+
+        @media (max-width: 800px) {
+            .layout { display: block; width: min(100% - 32px, 760px); margin-top: 20px; }
+            .sidebar { position: static; margin-bottom: 28px; }
+            .nav { display: flex; overflow-x: auto; padding-bottom: 4px; }
+            .nav a { white-space: nowrap; }
+            .setting { align-items: flex-start; }
+            .setting > :last-child { margin-left: auto; }
+        }
+
+        @media (max-width: 520px) {
+            .topbar { height: 64px; padding: 0 16px; }
+            .layout { width: calc(100% - 20px); }
+            main h1 { font-size: 28px; }
+            .setting { flex-wrap: wrap; }
+            .setting-text { min-width: calc(100% - 58px); }
+            .setting select, .setting .text-input { margin-left: 58px; width: calc(100% - 58px); }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <button class="back-button" type="button" aria-label="戻る" onclick="history.back()">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div class="title">設定</div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <label class="search">
+                <span class="material-symbols-outlined">search</span>
+                <input id="search" type="search" placeholder="設定を検索" autocomplete="off">
+            </label>
+            <nav class="nav" aria-label="設定カテゴリ">
+                <a class="active" href="#personalization"><span class="material-symbols-outlined">palette</span>デザイン</a>
+                <a href="#system"><span class="material-symbols-outlined">settings</span>システム</a>
+                <a href="#privacy"><span class="material-symbols-outlined">security</span>プライバシー</a>
+                <a href="#about"><span class="material-symbols-outlined">info</span>onChromeOS について</a>
+            </nav>
+        </aside>
+
+        <main>
+            <h1>設定</h1>
+            <p class="intro">onChromeOS の動作や見た目をカスタマイズできます。</p>
+
+            <section class="section" id="personalization">
+                <h2>デザイン</h2>
+                <div class="card">
+                    <div class="setting" data-search="テーマ ダーク ライト">
+                        <div class="setting-icon"><span class="material-symbols-outlined">dark_mode</span></div>
+                        <div class="setting-text">
+                            <div class="setting-title">テーマ</div>
+                            <div class="setting-description">明るさに合わせて外観を切り替えます。</div>
+                        </div>
+                        <select class="select" id="theme" aria-label="テーマ">
+                            <option value="system">システム</option>
+                            <option value="light">ライト</option>
+                            <option value="dark">ダーク</option>
+                        </select>
+                    </div>
+                    <div class="setting" data-search="壁紙 wallpaper">
+                        <div class="setting-icon"><span class="material-symbols-outlined">wallpaper</span></div>
+                        <div class="setting-text">
+                            <div class="setting-title">壁紙</div>
+                            <div class="setting-description">ホーム画面の背景を設定します。</div>
+                        </div>
+                        <button type="button" onclick="alert('壁紙設定は今後追加予定です。')">変更</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="system">
+                <h2>システム</h2>
+                <div class="card">
+                    <div class="setting" data-search="通知 notification">
+                        <div class="setting-icon"><span class="material-symbols-outlined">notifications</span></div>
+                        <div class="setting-text">
+                            <div class="setting-title">通知</div>
+                            <div class="setting-description">アプリやシステムからの通知を許可します。</div>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="setting" data-search="アニメーション animation">
+                        <div class="setting-icon"><span class="material-symbols-outlined">animation</span></div>
+                        <div class="setting-text">
+                            <div class="setting-title">アニメーション</div>
+                            <div class="setting-description">ウィンドウや UI のアニメーションを有効にします。</div>
+                        </div>
+                        <label class="switch"><input id="animations" type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="setting" data-search="言語 language 日本語 English">
+                        <div class="setting-icon"><span class="material-symbols-outlined">language</span></div>
+                        <div class="setting-text">
+                            <div class="setting-title">言語</div>
+                            <div class="setting-description">設定ページで使用する言語です。</div>
+                        </div>
+                        <select class="select" aria-label="言語">
+                            <option>日本語</option>
+                            <option>English</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="privacy">
+                <h2>プライバシー</h2>
+                <div class="card">
+                    <div class="setting" data-search="ローカルデータ local storage データ">
+                        <div class="setting-icon"><span class="material-symbols-outlined">database</span></div>
+                        <div class="setting-text">
+                            <div class="setting-title">ローカルデータ</div>
+                            <div class="setting-description">このブラウザに保存された onChromeOS の設定を管理します。</div>
+                        </div>
+                        <button type="button" class="danger" onclick="localStorage.clear(); location.reload();">データを消去</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="about">
+                <h2>onChromeOS について</h2>
+                <div class="card">
+                    <div class="setting">
+                        <div class="setting-icon"><span class="material-symbols-outlined">laptop_chromebook</span></div>
+                        <div class="setting-text">
+                            <div class="setting-title">onChromeOS</div>
+                            <div class="setting-description">Web technologies で作られた ChromeOS 風デスクトップ環境です。</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const theme = document.getElementById('theme');
+        const savedTheme = localStorage.getItem('onChromeOS-theme') || 'system';
+        theme.value = savedTheme;
+        theme.addEventListener('change', () => localStorage.setItem('onChromeOS-theme', theme.value));
+
+        const search = document.getElementById('search');
+        const settings = [...document.querySelectorAll('.setting[data-search]')];
+        search.addEventListener('input', () => {
+            const query = search.value.trim().toLowerCase();
+            settings.forEach((item) => {
+                item.hidden = query && !item.dataset.search.toLowerCase().includes(query);
+            });
+        });
+
+        document.getElementById('animations').addEventListener('change', (event) => {
+            document.documentElement.style.setProperty('--animation-duration', event.target.checked ? '.2s' : '0s');
+        });
+    </script>
+</body>
+</html>
