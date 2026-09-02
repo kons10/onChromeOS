@@ -26,7 +26,6 @@
         }
 
         * { box-sizing: border-box; }
-
         html, body { min-height: 100%; }
 
         body {
@@ -120,24 +119,29 @@
 
         .nav {
             margin-top: 20px;
-            display: grid;
-            gap: 4px;
+            width: 100%;
+            --md-list-container-color: transparent;
+            --md-list-item-container-color: transparent;
+            --md-list-item-label-text-color: var(--on-surface-variant);
+            --md-list-item-hover-label-text-color: var(--on-surface);
+            --md-list-item-selected-container-color: var(--primary-container);
+            --md-list-item-selected-label-text-color: var(--on-surface);
         }
 
-        .nav a {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
-            color: var(--on-surface-variant);
-            text-decoration: none;
+        .nav md-item {
+            display: block;
+            padding: 14px 16px 6px;
+            color: var(--on-surface);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav md-list-item {
+            margin: 2px 0;
             border-radius: 24px;
         }
 
-        .nav a:hover, .nav a.active {
-            background: var(--primary-container);
-            color: var(--on-surface);
-        }
+        .nav md-divider { margin: 8px 0; }
 
         main h1 {
             margin: 0 0 8px;
@@ -202,53 +206,34 @@
             font: inherit;
         }
 
-        .switch {
-            position: relative;
-            width: 52px;
-            height: 32px;
-            flex: 0 0 52px;
+        .setting md-switch {
+            flex: 0 0 auto;
+            --md-switch-selected-track-color: var(--primary);
+            --md-switch-selected-handle-color: white;
+            --md-switch-selected-hover-handle-color: white;
         }
 
-        .switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute;
-            inset: 0;
-            border: 2px solid var(--on-surface-variant);
-            border-radius: 999px;
+        button {
+            min-height: 40px;
+            padding: 0 16px;
+            border: 1px solid var(--outline);
+            border-radius: 20px;
+            background: var(--surface-container);
+            color: inherit;
+            font: inherit;
             cursor: pointer;
-            transition: .2s;
         }
 
-        .slider::before {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            left: 4px;
-            top: 4px;
-            border-radius: 50%;
-            background: var(--on-surface-variant);
-            transition: .2s;
-        }
-
-        .switch input:checked + .slider {
-            border-color: var(--primary);
-            background: var(--primary);
-        }
-
-        .switch input:checked + .slider::before {
-            transform: translateX(20px);
-            background: white;
-        }
-
+        button:hover { background: var(--surface-container-high); }
         .danger { color: var(--danger); }
 
         @media (max-width: 800px) {
             .layout { display: block; width: min(100% - 32px, 760px); margin-top: 20px; }
             .sidebar { position: static; margin-bottom: 28px; }
             .nav { display: flex; overflow-x: auto; padding-bottom: 4px; }
-            .nav a { white-space: nowrap; }
+            .nav md-item { display: none; }
+            .nav md-divider { display: none; }
+            .nav md-list-item { flex: 0 0 auto; }
             .setting { align-items: flex-start; }
             .setting > :last-child { margin-left: auto; }
         }
@@ -277,12 +262,22 @@
                 <span class="material-symbols-outlined">search</span>
                 <input id="search" type="search" placeholder="設定を検索" autocomplete="off">
             </label>
-            <nav class="nav" aria-label="設定カテゴリ">
-                <a class="active" href="#personalization"><span class="material-symbols-outlined">palette</span>デザイン</a>
-                <a href="#system"><span class="material-symbols-outlined">settings</span>システム</a>
-                <a href="#privacy"><span class="material-symbols-outlined">security</span>プライバシー</a>
-                <a href="#about"><span class="material-symbols-outlined">info</span>onChromeOS について</a>
-            </nav>
+
+            <md-list aria-label="設定カテゴリ" role="menubar" class="nav">
+                <md-item><div slot="headline">設定</div></md-item>
+                <md-list-item href="#personalization" type="link" selected="selected" tabindex="0" data-role="menuitem">
+                    デザイン
+                </md-list-item>
+                <md-list-item href="#system" type="link" tabindex="-1" data-role="menuitem">
+                    システム
+                </md-list-item>
+                <md-list-item href="#privacy" type="link" tabindex="-1" data-role="menuitem">
+                    プライバシー
+                </md-list-item>
+                <md-list-item href="#about" type="link" tabindex="-1" data-role="menuitem">
+                    onChromeOS について
+                </md-list-item>
+            </md-list>
         </aside>
 
         <main>
@@ -324,7 +319,7 @@
                             <div class="setting-title">通知</div>
                             <div class="setting-description">アプリやシステムからの通知を許可します。</div>
                         </div>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <md-switch id="notifications" selected aria-label="通知"></md-switch>
                     </div>
                     <div class="setting" data-search="アニメーション animation">
                         <div class="setting-icon"><span class="material-symbols-outlined">animation</span></div>
@@ -332,7 +327,7 @@
                             <div class="setting-title">アニメーション</div>
                             <div class="setting-description">ウィンドウや UI のアニメーションを有効にします。</div>
                         </div>
-                        <label class="switch"><input id="animations" type="checkbox" checked><span class="slider"></span></label>
+                        <md-switch id="animations" selected aria-label="アニメーション"></md-switch>
                     </div>
                     <div class="setting" data-search="言語 language 日本語 English">
                         <div class="setting-icon"><span class="material-symbols-outlined">language</span></div>
@@ -379,22 +374,46 @@
 
     <script>
         const theme = document.getElementById('theme');
-        const savedTheme = localStorage.getItem('onChromeOS-theme') || 'system';
-        theme.value = savedTheme;
-        theme.addEventListener('change', () => localStorage.setItem('onChromeOS-theme', theme.value));
+        theme.value = localStorage.getItem('onChromeOS-theme') || 'system';
+        theme.addEventListener('change', () => {
+            localStorage.setItem('onChromeOS-theme', theme.value);
+        });
 
         const search = document.getElementById('search');
         const settings = [...document.querySelectorAll('.setting[data-search]')];
         search.addEventListener('input', () => {
             const query = search.value.trim().toLowerCase();
             settings.forEach((item) => {
-                item.hidden = query && !item.dataset.search.toLowerCase().includes(query);
+                item.hidden = Boolean(query) && !item.dataset.search.toLowerCase().includes(query);
             });
         });
 
-        document.getElementById('animations').addEventListener('change', (event) => {
-            document.documentElement.style.setProperty('--animation-duration', event.target.checked ? '.2s' : '0s');
+        const notifications = document.getElementById('notifications');
+        notifications.selected = localStorage.getItem('onChromeOS-notifications') !== 'false';
+        notifications.addEventListener('change', () => {
+            localStorage.setItem('onChromeOS-notifications', String(notifications.selected));
         });
+
+        const animations = document.getElementById('animations');
+        animations.selected = localStorage.getItem('onChromeOS-animations') !== 'false';
+        const applyAnimations = () => {
+            document.documentElement.style.setProperty('--animation-duration', animations.selected ? '.2s' : '0s');
+        };
+        applyAnimations();
+        animations.addEventListener('change', () => {
+            localStorage.setItem('onChromeOS-animations', String(animations.selected));
+            applyAnimations();
+        });
+
+        const navItems = [...document.querySelectorAll('.nav md-list-item[href]')];
+        const updateNavigation = () => {
+            const current = window.location.hash || '#personalization';
+            navItems.forEach((item) => {
+                item.selected = item.getAttribute('href') === current;
+            });
+        };
+        window.addEventListener('hashchange', updateNavigation);
+        updateNavigation();
     </script>
 </body>
 </html>
