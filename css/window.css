@@ -46,6 +46,31 @@
     cursor: default;
 }
 
+/* スナップ（半画面）状態 */
+.window.snapping {
+    transition: all 0.2s ease;
+}
+
+.window.snapped-left,
+.window.snapped-right {
+    border-radius: 0;
+}
+
+/* スナップ中はリサイズ不可（ドラッグでの解除・移動はタイトルバーから可能） */
+.window.snapped-left .resize-handle,
+.window.snapped-right .resize-handle {
+    display: none;
+}
+
+/* 画面端側の角を直角に、内側の角だけ丸める */
+.window.snapped-left .window-content {
+    border-radius: 0 10px 10px 0;
+}
+
+.window.snapped-right .window-content {
+    border-radius: 10px 0 0 10px;
+}
+
 /* 最小化アニメーション */
 .window.minimizing {
     transition: all 0.2s ease;

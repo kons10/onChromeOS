@@ -10,9 +10,13 @@ import './npmbundle/material.web.mjs';
 import { initWindowManager } from './vanilla/window-manager.js';
 import { initShelf } from './vanilla/shelf.js';
 import { initLauncher } from './vanilla/launcher.js';
+import { initQuickSettings } from './vanilla/quick-settings.js';
+import { initShortcuts } from './vanilla/shortcuts.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initWindowManager();
     initShelf();
     initLauncher();
+    initQuickSettings();
+    initShortcuts();
 });

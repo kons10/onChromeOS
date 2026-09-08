@@ -1,15 +1,6 @@
 // shelf.js — ChromeOS Shelf（タスクバー）の初期化・ロジック
 
-import { focusWindow } from './window-manager.js';
-import { createNewWindow } from './launcher.js';
-
-const DEFAULT_APPS = {
-    calculator: { title: 'Calculator', url: 'https://gcalc.pages.dev/' },
-    browser: { title: 'Browser', url: 'https://www.google.com/search?igu=1' },
-    mail: { title: 'Mail', url: 'https://mail.google.com/' },
-    calendar: { title: 'Calendar', url: 'https://calendar.zyn.f5.si/' },
-    chat: { title: 'Chat', url: 'https://chat.google.com/' }
-};
+import { openApp } from './launcher.js';
 
 /**
  * hasLargeWindow の変更を監視してシェルフモードを切り替え。
@@ -58,40 +49,14 @@ function initClock() {
 
 /**
  * シェルフのアプリボタンとウィンドウを連携させる。
- * data-app-id 属性でウィンドウとの対応を判定。
+ * 起動処理（作成/復元/フォーカス）は launcher.js の openApp に集約。
  */
 function initAppButtons() {
     const buttons = document.querySelectorAll('.shelf-app-btn');
 
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const appId = btn.dataset.appId;
-            if (!appId) return;
-
-            let windowEl = document.querySelector(`.window[data-app-id="${appId}"]`);
-            if (!windowEl) {
-                // ウィンドウがDOMから削除されている場合は、デフォルト定義に基づいて再作成する
-                const appConfig = DEFAULT_APPS[appId];
-                if (appConfig) {
-                    windowEl = createNewWindow(appConfig.url, appConfig.title, appId);
-                }
-            }
-
-            if (!windowEl) return;
-
-            // 最小化されていれば復元
-            if (windowEl.hasAttribute('data-minimized')) {
-                windowEl.removeAttribute('data-minimized');
-                windowEl.style.display = '';
-            }
-
-            // 非表示なら表示
-            if (windowEl.style.display === 'none') {
-                windowEl.style.display = '';
-            }
-
-            // フォーカス
-            focusWindow(windowEl);
+            openApp(btn.dataset.appId);
         });
     });
 }

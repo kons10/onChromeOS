@@ -1,5 +1,6 @@
 // window.js - ウィンドウのドラッグ＆リサイズ機能
 import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
+import { resolveWindowDragEnd } from './window-manager.js';
 
 // ドラッグの neodrag オプションを生成（インスタンスの生成・再生成で共通利用）
 export function createDragOptions() {
@@ -21,6 +22,8 @@ export function createDragOptions() {
             // ドラッグ終了時に iframe のポインター操作を元に戻す
             const iframe = rootNode.querySelector('iframe');
             if (iframe) iframe.style.pointerEvents = '';
+            // エッジへのドロップなら最大化/スナップ、通常ドロップは位置を確定
+            resolveWindowDragEnd(rootNode);
         },
     };
 }

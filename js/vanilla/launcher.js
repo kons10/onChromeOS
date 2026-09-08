@@ -1,10 +1,18 @@
-// launcher.js - ランチャー（Everythingボタン）のダイアログとウィンドウ作成
+// launcher.js — ランチャー（アプリグリッド）とウィンドウ作成
+//
+// - シェルフ左のランチャーボタンで ChromeOS 風のアプリグリッドを開く
+// - グリッドからアプリを起動（openApp: 既存ウィンドウの復元 or 新規作成）
+// - 「URL からウィンドウを開く」で従来の URL ダイアログを引き続き利用できる
 
-import { focusWindow, nextZIndex, closeWindow, maximizeWindow, minimizeWindow, setupWindowButtons } from './window-manager.js';
-import { initWindowDrag, initWindowResize, createDragOptions } from './window.js';
 import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
+import { focusWindow, nextZIndex, setupWindowButtons } from './window-manager.js';
+import { createDragOptions } from './window.js';
+import { APP_DEFS, APP_LIST, GENERIC_APP_ICON } from './apps.js';
 
-// ダイアログ用のHTMLテンプレート
+// ---------------------------------------------------------------------------
+// URL ダイアログ用のHTMLテンプレート / スタイル
+// ---------------------------------------------------------------------------
+
 const DIALOG_HTML = `
 <div class="launcher-dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="launcher-dialog-title">
     <div class="launcher-dialog">
@@ -27,7 +35,6 @@ const DIALOG_HTML = `
 </div>
 `;
 
-// ダイアログ用のスタイル（インラインで注入）
 const DIALOG_STYLES = `
 .launcher-dialog-overlay {
     position: fixed;
@@ -204,13 +211,13 @@ function createWindowElement(appId, url, title) {
                 </div>
                 <div class="title-bar-right">
                     <md-icon-button title="Minimize" aria-label="Minimize" data-minimize>
-                        <md-icon></md-icon>
+                        <md-icon>\uE931</md-icon>
                     </md-icon-button>
                     <md-icon-button title="Maximize" aria-label="Maximize" data-maximize>
-                        <md-icon></md-icon>
+                        <md-icon>\uEB36</md-icon>
                     </md-icon-button>
                     <md-icon-button title="Close" aria-label="Close" data-close>
-                        <md-icon></md-icon>
+                        <md-icon>\uE5CD</md-icon>
                     </md-icon-button>
                 </div>
             </div>
@@ -237,8 +244,44 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// ---------------------------------------------------------------------------
+// アプリ起動（シェルフとランチャーグリッドの共通処理）
+// ---------------------------------------------------------------------------
+
+/**
+ * アプリIDに対応するウィンドウを開く。
+ * 存在すれば復元してフォーカス、無ければ定義に基づいて新規作成する。
+ * @param {string} appId
+ */
+export function openApp(appId) {
+    if (!appId) return;
+
+    let windowEl = document.querySelector(`.window[data-app-id="${appId}"]`);
+    if (!windowEl) {
+        const def = APP_DEFS[appId];
+        if (def) {
+            windowEl = createNewWindow(def.url, def.title, appId);
+        }
+    }
+    if (!windowEl) return;
+
+    // 最小化されていれば復元
+    if (windowEl.hasAttribute('data-minimized')) {
+        windowEl.removeAttribute('data-minimized');
+        windowEl.style.display = '';
+    }
+
+    // 非表示なら表示
+    if (windowEl.style.display === 'none') {
+        windowEl.style.display = '';
+    }
+
+    // フォーカス
+    focusWindow(windowEl);
+}
+
 // シェルフのアプリボタンを追加
-function addShelfAppButton(appId, title) {
+function addShelfAppButton(appId, title, icon) {
     const shelfCenter = document.querySelector('.shelf-center');
     if (!shelfCenter) return;
 
@@ -247,21 +290,11 @@ function addShelfAppButton(appId, title) {
     btn.dataset.appId = appId;
     btn.title = title;
     btn.setAttribute('aria-label', title);
-    btn.innerHTML = `<md-icon class="shelf-icon"></md-icon>`;
+    btn.innerHTML = `<md-icon class="shelf-icon">${icon}</md-icon>`;
 
-    // 既存のボタンと同じ動作を付与
+    // 既存のボタンと同じ動作（共通の openApp に委譲）
     btn.addEventListener('click', () => {
-        const windowEl = document.querySelector(`.window[data-app-id="${appId}"]`);
-        if (!windowEl) return;
-
-        if (windowEl.hasAttribute('data-minimized')) {
-            windowEl.removeAttribute('data-minimized');
-            windowEl.style.display = '';
-        }
-        if (windowEl.style.display === 'none') {
-            windowEl.style.display = '';
-        }
-        focusWindow(windowEl);
+        openApp(appId);
     });
 
     shelfCenter.appendChild(btn);
@@ -279,78 +312,9 @@ function initWindowClosedListener() {
     });
 }
 
-// ダイアログを表示
-function showLauncherDialog() {
-    injectStyles();
-
-    // 既存のダイアログがあれば削除
-    const existing = document.querySelector('.launcher-dialog-overlay');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.innerHTML = DIALOG_HTML;
-    const dialogEl = overlay.firstElementChild;
-    document.body.appendChild(dialogEl);
-
-    // アニメーション用に微小遅延
-    requestAnimationFrame(() => {
-        dialogEl.classList.add('visible');
-    });
-
-    const form = dialogEl.querySelector('.launcher-form');
-    const urlInput = dialogEl.querySelector('#launcher-url');
-    const titleInput = dialogEl.querySelector('#launcher-title');
-    const cancelBtn = dialogEl.querySelector('.btn-cancel');
-    const createBtn = dialogEl.querySelector('.btn-create');
-
-    // フォーカス
-    urlInput.focus();
-
-    // バリデーション
-    function validate() {
-        const urlValid = isValidUrl(urlInput.value.trim());
-        const titleValid = titleInput.value.trim().length > 0;
-        createBtn.disabled = !(urlValid && titleValid);
-    }
-    urlInput.addEventListener('input', validate);
-    titleInput.addEventListener('input', validate);
-    validate();
-
-    // キャンセル
-    function closeDialog() {
-        dialogEl.classList.remove('visible');
-        setTimeout(() => dialogEl.remove(), 200);
-    }
-
-    cancelBtn.addEventListener('click', closeDialog);
-    dialogEl.addEventListener('click', (e) => {
-        if (e.target === dialogEl) closeDialog();
-    });
-
-    // ESCキーで閉じる
-    function onKeydown(e) {
-        if (e.key === 'Escape') {
-            closeDialog();
-            document.removeEventListener('keydown', onKeydown);
-        }
-    }
-    document.addEventListener('keydown', onKeydown);
-
-    // フォーム送信
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const url = urlInput.value.trim();
-        const title = titleInput.value.trim();
-
-        if (!isValidUrl(url) || !title) return;
-
-        closeDialog();
-        document.removeEventListener('keydown', onKeydown);
-
-        // 新しいウィンドウを作成
-        createNewWindow(url, title);
-    });
-}
+// ---------------------------------------------------------------------------
+// 新しいウィンドウの作成と初期化
+// ---------------------------------------------------------------------------
 
 // 新しいウィンドウを作成して初期化
 export function createNewWindow(url, title, appId) {
@@ -380,9 +344,10 @@ export function createNewWindow(url, title, appId) {
 
     // シェルフボタンを追加（既存でなければ）
     if (!document.querySelector(`.shelf-app-btn[data-app-id="${appId}"]`)) {
-        addShelfAppButton(appId, title);
+        const def = APP_DEFS[appId];
+        addShelfAppButton(appId, title, def ? def.icon : GENERIC_APP_ICON);
     }
-    
+
     return windowEl;
 }
 
@@ -515,15 +480,240 @@ function setupResizeHandles(windowEl) {
     overlay.addEventListener('touchend', endResize);
 }
 
+// ---------------------------------------------------------------------------
+// ランチャー（アプリグリッド）
+// ---------------------------------------------------------------------------
+
+let launcherOverlay = null;
+let launcherSearch = null;
+let launcherGrid = null;
+let launcherOpen = false;
+let launcherBtn = null;
+
+// アプリグリッドを初回のみ構築
+function ensureLauncherBuilt() {
+    if (launcherOverlay) return;
+
+    launcherOverlay = document.createElement('div');
+    launcherOverlay.className = 'launcher-overlay';
+    launcherOverlay.setAttribute('role', 'dialog');
+    launcherOverlay.setAttribute('aria-modal', 'true');
+    launcherOverlay.setAttribute('aria-label', 'アプリランチャー');
+    launcherOverlay.innerHTML = `
+        <div class="launcher-sheet">
+            <div class="launcher-search">
+                <input type="search" class="launcher-search-input" placeholder="アプリを検索"
+                       aria-label="アプリを検索" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="launcher-grid" role="list"></div>
+            <div class="launcher-url-row">
+                <button type="button" class="launcher-url-btn">
+                    <span aria-hidden="true">+</span>
+                    アプリ以外の URL からウィンドウを開く
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(launcherOverlay);
+
+    launcherSearch = launcherOverlay.querySelector('.launcher-search-input');
+    launcherGrid = launcherOverlay.querySelector('.launcher-grid');
+    const urlBtn = launcherOverlay.querySelector('.launcher-url-btn');
+
+    // アプリタイルを生成（APP_LIST はアルファベット順）
+    for (const def of APP_LIST) {
+        const tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'launcher-app';
+        tile.dataset.appId = def.id;
+        tile.setAttribute('role', 'listitem');
+        tile.title = def.title;
+        tile.innerHTML = `
+            <span class="launcher-app-icon"><md-icon>${def.icon}</md-icon></span>
+            <span class="launcher-app-name">${escapeHtml(def.title)}</span>
+        `;
+        launcherGrid.appendChild(tile);
+    }
+
+    // タイルクリックで起動して閉じる
+    launcherGrid.addEventListener('click', (e) => {
+        const tile = e.target.closest('.launcher-app');
+        if (!tile) return;
+        openApp(tile.dataset.appId);
+        closeLauncher();
+    });
+
+    // 検索フィルタ
+    launcherSearch.addEventListener('input', () => {
+        const query = launcherSearch.value.trim().toLowerCase();
+        launcherGrid.querySelectorAll('.launcher-app').forEach(tile => {
+            const label = `${tile.dataset.appId} ${tile.title || tile.querySelector('.launcher-app-name')?.textContent || ''}`.toLowerCase();
+            tile.hidden = query.length > 0 && !label.includes(query);
+        });
+    });
+
+    // 検索欄で Enter → 先頭の一致タイルを起動
+    launcherSearch.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const first = launcherGrid.querySelector('.launcher-app:not([hidden])');
+        if (first) {
+            openApp(first.dataset.appId);
+            closeLauncher();
+        }
+    });
+
+    // URLダイアログを開く
+    urlBtn.addEventListener('click', () => {
+        showUrlDialog();
+    });
+
+    // オーバーレイ（シート外）クリックで閉じる
+    launcherOverlay.addEventListener('pointerdown', (e) => {
+        if (e.target === launcherOverlay) {
+            closeLauncher();
+        }
+    });
+
+    // Esc で閉じる（検索欄でのキー入力はそのまま）
+    launcherOverlay.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            closeLauncher();
+        }
+    });
+}
+
+/** ランチャーを開く */
+export function openLauncher() {
+    ensureLauncherBuilt();
+    if (launcherOpen) return;
+
+    launcherOpen = true;
+    launcherOverlay.classList.add('open');
+    launcherOverlay.setAttribute('aria-hidden', 'false');
+    launcherSearch.value = '';
+    // 前回のフィルタをリセット
+    launcherGrid.querySelectorAll('.launcher-app[hidden]').forEach(tile => {
+        tile.hidden = false;
+    });
+
+    // トランジション開始後にフォーカスを移す（表示を待つため1フレーム遅らせる）
+    requestAnimationFrame(() => {
+        launcherSearch.focus();
+    });
+}
+
+/** ランチャーを閉じる */
+export function closeLauncher() {
+    if (!launcherOpen || !launcherOverlay) return;
+    launcherOpen = false;
+    launcherOverlay.classList.remove('open');
+    launcherOverlay.setAttribute('aria-hidden', 'true');
+    // フォーカスをランチャーボタンへ戻す
+    if (launcherBtn && document.activeElement && document.activeElement.closest('.launcher-overlay')) {
+        launcherBtn.focus();
+    }
+}
+
+/** ランチャーの開閉を切り替える（ショートカット用） */
+export function toggleLauncher() {
+    if (launcherOpen) {
+        closeLauncher();
+    } else {
+        openLauncher();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// URL ダイアログ
+// ---------------------------------------------------------------------------
+
+// URL入力ダイアログを表示（ランチャーの「URLから開く」から呼ばれる）
+function showUrlDialog() {
+    injectStyles();
+
+    // 既存のダイアログがあれば削除
+    const existing = document.querySelector('.launcher-dialog-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.innerHTML = DIALOG_HTML;
+    const dialogEl = overlay.firstElementChild;
+    document.body.appendChild(dialogEl);
+
+    // アニメーション用に微小遅延
+    requestAnimationFrame(() => {
+        dialogEl.classList.add('visible');
+    });
+
+    const form = dialogEl.querySelector('.launcher-form');
+    const urlInput = dialogEl.querySelector('#launcher-url');
+    const titleInput = dialogEl.querySelector('#launcher-title');
+    const cancelBtn = dialogEl.querySelector('.btn-cancel');
+    const createBtn = dialogEl.querySelector('.btn-create');
+
+    // フォーカス
+    urlInput.focus();
+
+    // バリデーション
+    function validate() {
+        const urlValid = isValidUrl(urlInput.value.trim());
+        const titleValid = titleInput.value.trim().length > 0;
+        createBtn.disabled = !(urlValid && titleValid);
+    }
+    urlInput.addEventListener('input', validate);
+    titleInput.addEventListener('input', validate);
+    validate();
+
+    // キャンセル
+    function closeDialog() {
+        dialogEl.classList.remove('visible');
+        setTimeout(() => dialogEl.remove(), 200);
+    }
+
+    cancelBtn.addEventListener('click', closeDialog);
+    dialogEl.addEventListener('click', (e) => {
+        if (e.target === dialogEl) closeDialog();
+    });
+
+    // ESCキーで閉じる
+    function onKeydown(e) {
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            closeDialog();
+            document.removeEventListener('keydown', onKeydown);
+        }
+    }
+    document.addEventListener('keydown', onKeydown);
+
+    // フォーム送信
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const url = urlInput.value.trim();
+        const title = titleInput.value.trim();
+
+        if (!isValidUrl(url) || !title) return;
+
+        closeDialog();
+        document.removeEventListener('keydown', onKeydown);
+
+        // 新しいウィンドウを作成
+        createNewWindow(url, title);
+        closeLauncher();
+    });
+}
+
 // ランチャー初期化
 export function initLauncher() {
-    const launcherBtn = document.querySelector('.shelf-left md-icon-button[data-launcher]');
+    launcherBtn = document.querySelector('.shelf-left md-icon-button[data-launcher]');
     if (!launcherBtn) {
         console.warn('Launcher button not found');
         return;
     }
 
-    launcherBtn.addEventListener('click', showLauncherDialog);
+    launcherBtn.addEventListener('click', () => {
+        toggleLauncher();
+    });
 
     // ウィンドウが閉じられた時のシェルフボタン自動削除を初期化
     initWindowClosedListener();

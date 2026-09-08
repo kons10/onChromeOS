@@ -15,3 +15,8 @@ node_modules/
 # Editors
 .vscode/
 .idea/
+
+# AI Editors
+.freebuff/desktop.db
+.freebuff/project-id
+

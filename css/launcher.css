@@ -1,0 +1,203 @@
+/* launcher.css — アプリランチャー（アプリグリッド・検索）のスタイル */
+
+.launcher-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+
+.launcher-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.launcher-overlay[hidden] {
+    display: none;
+}
+
+.launcher-sheet {
+    display: flex;
+    flex-direction: column;
+    width: min(680px, 94vw);
+    max-height: min(74vh, 640px);
+    margin-bottom: 56px; /* シェルフの上に浮かせる */
+    background: rgba(248, 249, 250, 0.78);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    transform: translateY(18px) scale(0.98);
+    opacity: 0;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.launcher-overlay.open .launcher-sheet {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* 検索バー */
+.launcher-search {
+    flex: none;
+    margin: 16px 16px 8px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 28px;
+}
+
+.launcher-search md-icon {
+    color: var(--md-sys-color-on-surface-variant, #5f6368);
+    font-size: 22px;
+}
+
+.launcher-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--md-sys-color-on-surface, #202124);
+    min-width: 0;
+}
+
+.launcher-search-input::placeholder {
+    color: var(--md-sys-color-on-surface-variant, #9aa0a6);
+}
+
+/* アプリグリッド */
+.launcher-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 4px;
+    align-content: start;
+}
+
+.launcher-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 6px 8px;
+    background: none;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+}
+
+.launcher-app:hover {
+    background: rgba(0, 0, 0, 0.07);
+}
+
+.launcher-app:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary, #1f6feb);
+    outline-offset: -2px;
+}
+
+.launcher-app[hidden] {
+    display: none;
+}
+
+.launcher-app-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    color: var(--md-sys-color-on-surface, #202124);
+}
+
+.launcher-app-icon md-icon {
+    font-size: 30px;
+}
+
+.launcher-app-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface, #202124);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* URLから開く行 */
+.launcher-url-row {
+    flex: none;
+    padding: 4px 16px 14px;
+}
+
+.launcher-url-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px dashed rgba(0, 0, 0, 0.18);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--md-sys-color-on-surface, #202124);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.launcher-url-btn:hover {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--md-sys-color-primary, #1f6feb);
+}
+
+.launcher-url-btn md-icon {
+    font-size: 20px;
+}
+
+/* ダークテーマ */
+body.dark-theme .launcher-sheet {
+    background: rgba(32, 33, 36, 0.82);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .launcher-search {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .launcher-app:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .launcher-app-icon {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+body.dark-theme .launcher-url-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+body.dark-theme .launcher-url-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
