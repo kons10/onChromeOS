@@ -146,7 +146,13 @@ export function maximizeWindow(windowEl) {
         clearSnapVisuals(windowEl);
     } else {
         // 浮遊中のドラッグ位置を確定させてから保存（復元位置の正確化）
-        materializePosition(windowEl);
+        // neodrag の transform を絶対座標に変換してスタイルに適用
+        const rect = windowEl.getBoundingClientRect();
+        windowEl.style.left = `${rect.left}px`;
+        windowEl.style.top = `${rect.top}px`;
+        windowEl.style.width = `${rect.width}px`;
+        windowEl.style.height = `${rect.height}px`;
+        destroyDrag(windowEl);
         snapshotGeometry(windowEl);
     }
 
