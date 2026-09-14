@@ -9,7 +9,8 @@ export const APP_DEFS = {
     browser: { id: 'browser', title: 'Browser', url: 'https://www.google.com/search?igu=1', icon: '\uE2DB' },
     mail: { id: 'mail', title: 'Mail', url: 'https://mail.google.com/', icon: '\uE158' },
     calendar: { id: 'calendar', title: 'Calendar', url: 'https://calendar.zyn.f5.si/', icon: '\uE935' },
-    chat: { id: 'chat', title: 'Chat', url: 'https://chat.google.com/', icon: '\uE0B7' }
+    chat: { id: 'chat', title: 'Chat', url: 'https://chat.google.com/', icon: '\uE0B7' },
+    settings: { id: 'settings', title: '設定', url: 'config.html', icon: '\uE8B8' }
 };
 
 // カスタムURLウィンドウなど、定義外アプリのシェルフボタンに使う汎用グリフ
