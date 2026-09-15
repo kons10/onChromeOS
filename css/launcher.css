@@ -79,13 +79,15 @@
     color: var(--md-sys-color-on-surface-variant, #9aa0a6);
 }
 
-/* アプリグリッド */
+/* アプリグリッド：常に6列×5行分のアイコン領域を確保 */
 .launcher-grid {
     flex: 1;
     overflow-y: auto;
     padding: 8px 12px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-auto-rows: 88px;
+    min-height: 440px;
     gap: 4px;
     align-content: start;
 }
@@ -94,8 +96,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
     gap: 6px;
     padding: 10px 6px 8px;
+    min-width: 0;
     background: none;
     border: none;
     border-radius: 16px;
@@ -122,6 +126,7 @@
     place-items: center;
     width: 56px;
     height: 56px;
+    flex: none;
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.72);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
