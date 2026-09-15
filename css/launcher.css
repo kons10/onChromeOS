@@ -29,7 +29,7 @@
     flex-direction: column;
     width: min(680px, 94vw);
     max-height: min(74vh, 640px);
-    margin: 0 0 56px 16px; /* シェルフの左下に浮かせる */
+    margin: 0 0 56px 16px;
     background: rgba(248, 249, 250, 0.94);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -141,10 +141,14 @@
     font-size: 12.5px;
     font-weight: 500;
     color: var(--md-sys-color-on-surface, #202124);
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: center;
+    line-height: 18px;
 }
 
 /* URLから開く行 */
