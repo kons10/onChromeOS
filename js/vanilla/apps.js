@@ -7,7 +7,7 @@
 export const APP_DEFS = {
     calculator: { id: 'calculator', title: 'Calculator', url: 'https://gcalc.pages.dev/', icon: '\uEA5F' },
     browser: { id: 'browser', title: 'Browser', url: 'https://www.google.com/search?igu=1', icon: '\uE2DB' },
-    mail: { id: 'docs', title: 'TextPad', url: 'https://textpad.surge.sh/', icon: '\uEA7D' },
+    mail: { id: 'mail', title: 'TextPad', url: 'https://textpad.surge.sh/', icon: '\uEA7D' },
     calendar: { id: 'calendar', title: 'Calendar', url: 'https://calendar.zyn.f5.si/', icon: '\uE935' },
     chat: { id: 'chat', title: 'Chat', url: 'https://chat.google.com/', icon: '\uE0B7' },
     settings: { id: 'settings', title: 'Settings', url: 'config.html', icon: '\uE8B8' }
