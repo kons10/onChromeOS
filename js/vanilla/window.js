@@ -1,6 +1,11 @@
 // window.js - ウィンドウのドラッグ＆リサイズ機能
 import { Draggable } from 'https://esm.sh/@neodrag/vanilla@2.3.1';
-import { resolveWindowDragEnd } from './window-manager.js';
+import {
+    resolveWindowDragEnd,
+    startTilePreview,
+    updateTilePreviewPosition,
+    endTilePreview,
+} from './window-manager.js';
 
 // ドラッグの neodrag オプションを生成（インスタンスの生成・再生成で共通利用）
 export function createDragOptions() {
@@ -11,17 +16,40 @@ export function createDragOptions() {
         // 既存の .dragging / .dragged クラス名に合わせる
         defaultClassDragging: 'dragging',
         defaultClassDragged: 'dragged',
-        onDragStart: ({ rootNode }) => {
+        onDragStart: ({ rootNode, event }) => {
             // 最大化状態ではドラッグさせない（念のためのガード）
             if (rootNode.hasAttribute('data-maximized')) return;
+
+            // タイリング先のプレビューを表示開始
+            startTilePreview(rootNode);
+
+            // ドラッグ開始位置も即座に反映
+            const clientX = event?.clientX ?? event?.touches?.[0]?.clientX;
+            const clientY = event?.clientY ?? event?.touches?.[0]?.clientY;
+            if (clientX != null && clientY != null) {
+                updateTilePreviewPosition(clientX, clientY);
+            }
+
             // ドラッグ中は iframe がイベントを奪うのを防ぐ
             const iframe = rootNode.querySelector('iframe');
             if (iframe) iframe.style.pointerEvents = 'none';
+        },
+        onDrag: ({ rootNode, event }) => {
+            // ドラッグ中はポインター位置に応じて、実際のタイリング先をプレビュー
+            const clientX = event?.clientX ?? event?.touches?.[0]?.clientX;
+            const clientY = event?.clientY ?? event?.touches?.[0]?.clientY;
+            if (clientX != null && clientY != null) {
+                updateTilePreviewPosition(clientX, clientY);
+            }
         },
         onDragEnd: ({ rootNode }) => {
             // ドラッグ終了時に iframe のポインター操作を元に戻す
             const iframe = rootNode.querySelector('iframe');
             if (iframe) iframe.style.pointerEvents = '';
+
+            // プレビューを消してから、エッジへのドロップ処理へ渡す
+            endTilePreview();
+
             // エッジへのドロップなら最大化/スナップ、通常ドロップは位置を確定
             resolveWindowDragEnd(rootNode);
         },
