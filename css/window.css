@@ -46,6 +46,31 @@
     cursor: default;
 }
 
+/* タイリング先プレビュー */
+.tile-preview {
+    position: fixed;
+    z-index: 90;
+    inset: 0 auto auto 0;
+    display: none;
+    pointer-events: none;
+    box-sizing: border-box;
+    background: color-mix(in srgb, var(--md-sys-color-primary, #6750a4) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--md-sys-color-primary, #6750a4) 32%, transparent);
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.12s ease, left 0.12s ease, top 0.12s ease, width 0.12s ease, height 0.12s ease;
+}
+
+.tile-preview.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* 最大化プレビューだけ画面端までフラットにする */
+.tile-preview.preview-maximize {
+    border-radius: 0;
+}
+
 /* スナップ（半画面）状態 */
 .window.snapping {
     transition: all 0.2s ease;
