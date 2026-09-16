@@ -16,33 +16,32 @@ export function createDragOptions() {
         // 既存の .dragging / .dragged クラス名に合わせる
         defaultClassDragging: 'dragging',
         defaultClassDragged: 'dragged',
-        onDragStart: ({ rootNode, event }) => {
+        onDragStart: ({ rootNode }) => {
             // 最大化状態ではドラッグさせない（念のためのガード）
             if (rootNode.hasAttribute('data-maximized')) return;
 
             // タイリング先のプレビューを表示開始
             startTilePreview(rootNode);
 
-            // ドラッグ開始位置も即座に反映
-            const clientX = event?.clientX ?? event?.touches?.[0]?.clientX;
-            const clientY = event?.clientY ?? event?.touches?.[0]?.clientY;
-            if (clientX != null && clientY != null) {
-                updateTilePreviewPosition(clientX, clientY);
-            }
+            // neodrag の DragEventData には PointerEvent が含まれないため、
+            // ドラッグ中だけ document の pointermove を監視する。
+            const previewMoveHandler = (event) => {
+                updateTilePreviewPosition(event.clientX, event.clientY);
+            };
+            rootNode._tilePreviewMoveHandler = previewMoveHandler;
+            document.addEventListener('pointermove', previewMoveHandler, { passive: true });
 
             // ドラッグ中は iframe がイベントを奪うのを防ぐ
             const iframe = rootNode.querySelector('iframe');
             if (iframe) iframe.style.pointerEvents = 'none';
         },
-        onDrag: ({ rootNode, event }) => {
-            // ドラッグ中はポインター位置に応じて、実際のタイリング先をプレビュー
-            const clientX = event?.clientX ?? event?.touches?.[0]?.clientX;
-            const clientY = event?.clientY ?? event?.touches?.[0]?.clientY;
-            if (clientX != null && clientY != null) {
-                updateTilePreviewPosition(clientX, clientY);
-            }
-        },
         onDragEnd: ({ rootNode }) => {
+            // タイリング先プレビュー用の pointermove を解除
+            if (rootNode._tilePreviewMoveHandler) {
+                document.removeEventListener('pointermove', rootNode._tilePreviewMoveHandler);
+                rootNode._tilePreviewMoveHandler = null;
+            }
+
             // ドラッグ終了時に iframe のポインター操作を元に戻す
             const iframe = rootNode.querySelector('iframe');
             if (iframe) iframe.style.pointerEvents = '';
