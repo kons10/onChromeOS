@@ -60,6 +60,101 @@ export function closeWindow(windowEl) {
 }
 
 // ---------------------------------------------------------------------------
+// タイリング先プレビュー
+// ---------------------------------------------------------------------------
+
+let tilePreviewElement = null;
+let tilePreviewWindow = null;
+
+function ensureTilePreview() {
+    if (tilePreviewElement) return tilePreviewElement;
+
+    tilePreviewElement = document.createElement('div');
+    tilePreviewElement.className = 'tile-preview';
+    tilePreviewElement.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tilePreviewElement);
+
+    return tilePreviewElement;
+}
+
+function setTilePreviewRegion(region) {
+    const preview = ensureTilePreview();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const halfWidth = Math.floor(viewportWidth / 2);
+
+    preview.classList.remove('preview-maximize');
+
+    if (region === 'maximize') {
+        preview.style.left = '0px';
+        preview.style.top = '0px';
+        preview.style.width = `${viewportWidth}px`;
+        preview.style.height = `${viewportHeight}px`;
+        preview.classList.add('preview-maximize');
+    } else if (region === 'left') {
+        preview.style.left = '0px';
+        preview.style.top = '0px';
+        preview.style.width = `${halfWidth}px`;
+        preview.style.height = `${viewportHeight}px`;
+    } else if (region === 'right') {
+        preview.style.left = `${halfWidth}px`;
+        preview.style.top = '0px';
+        preview.style.width = `${viewportWidth - halfWidth}px`;
+        preview.style.height = `${viewportHeight}px`;
+    }
+
+    preview.classList.add('visible');
+}
+
+function hideTilePreview() {
+    if (!tilePreviewElement) return;
+    tilePreviewElement.classList.remove('visible', 'preview-maximize');
+    tilePreviewWindow = null;
+}
+
+/**
+ * 現在のポインター位置から、実際にドロップ時に適用される領域をプレビューする。
+ * エッジ判定は resolveWindowDragEnd() と同じ 8px を基準にしつつ、
+ * ドラッグ中に視認しやすいようプレビュー開始範囲は 24px にしている。
+ */
+function updateTilePreview(clientX, clientY) {
+    if (!tilePreviewWindow || tilePreviewWindow.hasAttribute('data-maximized')) {
+        hideTilePreview();
+        return;
+    }
+
+    const previewEdge = 24;
+    const viewportWidth = window.innerWidth;
+
+    if (clientY <= previewEdge) {
+        setTilePreviewRegion('maximize');
+    } else if (clientX <= previewEdge) {
+        setTilePreviewRegion('left');
+    } else if (viewportWidth - clientX <= previewEdge) {
+        setTilePreviewRegion('right');
+    } else {
+        hideTilePreview();
+    }
+}
+
+/**
+ * ドラッグ開始時にタイリング先プレビューを有効化する。
+ * pointermove をここで一度だけ登録するため、通常時のイベント負荷は増やさない。
+ */
+export function startTilePreview(windowEl) {
+    tilePreviewWindow = windowEl;
+    ensureTilePreview();
+}
+
+export function updateTilePreviewPosition(clientX, clientY) {
+    updateTilePreview(clientX, clientY);
+}
+
+export function endTilePreview() {
+    hideTilePreview();
+}
+
+// ---------------------------------------------------------------------------
 // ジオメトリ・状態管理ヘルパ
 // ---------------------------------------------------------------------------
 
@@ -134,6 +229,8 @@ function clearSnapVisuals(windowEl) {
  * 最大化中なら復元、それ以外（浮遊・スナップ中）なら最大化する。
  */
 export function maximizeWindow(windowEl) {
+    endTilePreview();
+
     // 最大化中の再クリックは復元
     if (windowEl.hasAttribute('data-maximized')) {
         restoreWindow(windowEl);
@@ -168,6 +265,8 @@ export function restoreWindow(windowEl) {
     const snapRegion = windowEl.dataset.snapped;
     if (!isMaximized && !snapRegion) return;
 
+    endTilePreview();
+
     // アニメーション用クラス（最大化→復元 / スナップ→復元 で同じ遷移を使う）
     windowEl.classList.add('maximizing');
     restoreGeometry(windowEl);
@@ -199,6 +298,8 @@ export function restoreWindow(windowEl) {
  * @param {'left'|'right'} region
  */
 export function snapWindow(windowEl, region) {
+    endTilePreview();
+
     if (region !== 'left' && region !== 'right') return;
     if (windowEl.hasAttribute('data-maximized')) return;
 
@@ -239,6 +340,8 @@ export function snapWindow(windowEl, region) {
 export function detachWindow(windowEl) {
     if (!windowEl.dataset.snapped) return;
 
+    endTilePreview();
+
     // ドラッグ先の表示位置を絶対座標として確定
     materializePosition(windowEl);
     clearSnapVisuals(windowEl);
@@ -257,6 +360,8 @@ export function detachWindow(windowEl) {
  * エッジへのドロップで最大化/スナップを適用し、通常ドロップは位置を確定する。
  */
 export function resolveWindowDragEnd(windowEl) {
+    endTilePreview();
+
     if (windowEl.hasAttribute('data-maximized')) return;
 
     const rect = windowEl.getBoundingClientRect();
@@ -298,6 +403,8 @@ export function resolveWindowDragEnd(windowEl) {
 
 // ウィンドウの最小化
 export function minimizeWindow(windowEl) {
+    endTilePreview();
+
     const content = windowEl.querySelector('.window-content');
     windowEl.classList.add('minimizing');
     content.classList.add('minimizing');
