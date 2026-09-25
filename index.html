@@ -13,6 +13,7 @@
     <!-- Critical CSS inlined for faster FCP -->
     <style>
         *{box-sizing:border-box}:root{--md-sys-color-primary:#1f6feb;--md-sys-color-on-surface:#202124;--md-sys-color-surface:#fff;--md-sys-color-surface-dim:#eee;--md-elevation-level:1}body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);margin:0;padding:40px;font-family:'Roboto',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:flex-start}.window{width:480px;height:600px;position:absolute;top:40px;left:50%;transform:translateX(-50%);transition:box-shadow .3s ease;z-index:100}.window.dragging,.window.resizing{transition:none}.window.window-focused{--md-elevation-level:2}.window.maximizing{transition:all .2s ease}.window.maximized .resize-handle{display:none}.window.maximized{width:100%;height:100%;left:0;top:0;border-radius:0}.window.maximized .window-content{border-radius:0}.window.maximized .title-bar{cursor:default}.window.minimizing{transition:all .2s ease}.window-content{display:flex;flex-direction:column;width:100%;height:100%;background:var(--md-sys-color-surface);border-radius:10px;overflow:hidden;position:relative;z-index:1;transition:opacity .2s ease,transform .2s ease}.window-content.closing{opacity:0;transform:scale(.95)}.window-content.minimizing{opacity:0;transform:scale(.8) translateY(20px)}.title-bar{display:flex;align-items:center;justify-content:space-between;height:auto;padding:0 0 0 16px;background:var(--md-sys-color-surface-dim);border-bottom:1px solid #e0e0e0;cursor:move;user-select:none;-webkit-user-select:none;position:relative;z-index:1}.title-bar-left{display:flex;align-items:center;flex:1}.title-text{font-size:auto;font-weight:500;color:var(--md-sys-color-on-surface);letter-spacing:.25px}.title-bar-right{display:flex;align-items:center}md-icon-button{--md-icon-button-icon-size:20px}iframe{flex:1;border:none;background:#fff}.resize-handle{position:absolute;z-index:10}.handle-t{top:-4px;left:4px;right:4px;height:8px;cursor:ns-resize}.handle-b{bottom:-4px;left:4px;right:4px;height:8px;cursor:ns-resize}.handle-l{left:-4px;top:4px;bottom:4px;width:8px;cursor:ew-resize}.handle-r{right:-4px;top:4px;bottom:4px;width:8px;cursor:ew-resize}.handle-tl{top:-4px;left:-4px;width:8px;height:8px;cursor:nwse-resize}.handle-tr{top:-4px;right:-4px;width:8px;height:8px;cursor:nesw-resize}.handle-bl{bottom:-4px;left:-4px;width:8px;height:8px;cursor:nesw-resize}.handle-br{bottom:-4px;right:-4px;width:8px;height:8px;cursor:nwse-resize}
+            #onchromeos-splash{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#fff;color:#202124;font-family:'Roboto',system-ui,sans-serif;opacity:1;transition:opacity .22s ease}#onchromeos-splash[hidden]{display:none}#onchromeos-splash.onchromeos-splash-hidden{opacity:0;pointer-events:none}.onchromeos-splash-content{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:240px;gap:18px}.onchromeos-splash-logo{font-size:28px;font-weight:500;letter-spacing:.2px}.onchromeos-splash-status{font-size:14px;color:#5f6368}.onchromeos-splash-list{display:none;width:min(420px,calc(100vw - 48px));gap:8px}.onchromeos-splash-item{display:grid;grid-template-columns:22px 1fr;align-items:center;gap:8px;font-size:13px;color:#5f6368}.onchromeos-splash-mark{font-family:system-ui;font-size:15px;text-align:center}.onchromeos-splash-item[data-state="done"]{color:#3c4043}.onchromeos-splash-item[data-state="error"]{color:#b3261e}#onchromeos-splash[data-mode="more"] .onchromeos-splash-list{display:grid}#onchromeos-splash[data-mode="more"] .onchromeos-splash-status{display:none}
     </style>
     
     <!-- Non-critical CSS loaded asynchronously -->
@@ -32,6 +33,14 @@
     <script src="js/main.js" type="module"></script>
 </head>
 <body>
+    <div id="onchromeos-splash" data-mode="true" hidden aria-live="polite">
+        <div class="onchromeos-splash-content">
+            <div class="onchromeos-splash-logo">onChromeOS</div>
+            <div class="onchromeos-splash-status" id="onchromeos-splash-status">Loading...</div>
+            <div class="onchromeos-splash-list" id="onchromeos-splash-list"></div>
+        </div>
+    </div>
+
     <main>
         <div class="window" data-app-id="calculator">
             <div class="window-content">
