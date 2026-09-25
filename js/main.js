@@ -15,9 +15,9 @@ splash.setStatus('Loading MWC.JS');
 await import('./npmbundle/material.web.mjs');
 splash.setStatus('Loading MWC.JS', 'done');
 
-splash.setStatus('Initializing desktop');
+function initializeDesktop() {
+    splash.setStatus('Initializing desktop');
 
-document.addEventListener('DOMContentLoaded', () => {
     initWindowManager();
     initShelf();
     initLauncher();
@@ -26,4 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     splash.setStatus('Initializing desktop', 'done');
     splash.finish();
-});
+}
+
+// MWC.JS の読み込み中に DOMContentLoaded が発火している場合があるため、
+// readyState を確認してから初期化する。
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDesktop, { once: true });
+} else {
+    initializeDesktop();
+}
