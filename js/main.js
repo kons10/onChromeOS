@@ -2,16 +2,20 @@
 // 各モジュールは純粋な宣言のみを行い、副作用（DOM 操作・初期化）は
 // ここから明示的に呼び出すことでテスト容易性と再利用性を高める。
 
-// Material Web Components（副作用のみの外部バンドル）
-import './npmbundle/material.web.mjs';
-
-// window-manager.js は内部で window.js を import するため、
-// window.js は明示的に import しなくても連鎖的に読み込まれる。
+import { splash } from './splash.js';
 import { initWindowManager } from './vanilla/window-manager.js';
 import { initShelf } from './vanilla/shelf.js';
 import { initLauncher } from './vanilla/launcher.js';
 import { initQuickSettings } from './vanilla/quick-settings.js';
 import { initShortcuts } from './vanilla/shortcuts.js';
+
+splash.setStatus('Loading MWC.JS');
+
+// Material Web Components（副作用のみの外部バンドル）
+await import('./npmbundle/material.web.mjs');
+splash.setStatus('Loading MWC.JS', 'done');
+
+splash.setStatus('Initializing desktop');
 
 document.addEventListener('DOMContentLoaded', () => {
     initWindowManager();
@@ -19,4 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLauncher();
     initQuickSettings();
     initShortcuts();
+
+    splash.setStatus('Initializing desktop', 'done');
+    splash.finish();
 });
